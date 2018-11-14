@@ -1,0 +1,1005 @@
+---
+title: 'MODÉLISATION DES DONNÉES DU TOMPA TREE'
+author: "Louis-Paul Rivest & Sergio Ewane Ebouele"
+date: "`r Sys.time()`"
+output:
+  html_notebook:
+    fig_width: 13
+    toc: yes
+  word_document:
+    toc: yes
+---
+
+```{r warning=FALSE, results='hide',message=FALSE}
+source("arbres.R")
+library(betareg) ; library(flexsurv) ; library(lmtest); library(modeltools) ; library(pscl)  ;  library(simsurv)
+library(rgl)  ;  library(boot)  ; set.seed(800)
+```
+
+
+# I-/ LES DONNÉES
+
+```{r echo=FALSE}
+
+# Lecture des jeux de données
+
+niveau2<-read.table("niveau2Tom.txt", header = TRUE, sep = "\t")
+niveau3<-read.table("niveau3Tom.txt", header = TRUE, sep = "\t")
+niveau4<-read.table("niveau4Tom.txt", header = TRUE, sep = "\t")
+TT.obs<-read.table("TTobs.txt", header = TRUE, sep = "\t",dec = ",")  ;  Ltronc<-TT.obs$L1[1]
+
+# Standardisation des longueurs
+niveau2$Longueur.std<-niveau2$Longueur/Ltronc
+niveau3$Longueur.std<-niveau3$Longueur/Ltronc
+niveau4$Longueur.std<-niveau4$Longueur/Ltronc
+
+TT.obs$L1<-TT.obs$L1/Ltronc   ;  TT.obs$L2<-TT.obs$L2/Ltronc  ;  TT.obs$L3<-TT.obs$L3/Ltronc
+TT.obs$L4<-TT.obs$L4/Ltronc
+
+# rotation des coordonnées des branches du niveau 3 : La branche mère est au niveau 2
+y<-c(niveau2$C1.1[1],niveau2$C1.2[1],niveau2$C1.3[1])
+n<-dim(niveau3)[1]   ;    I3<-diag(1,3,3)
+for(i in 1:n){
+  x<-c(niveau3$C2.1[i],niveau3$C2.2[i],niveau3$C2.3[i])
+  R.1_2<-I3 + (y%*%t(x) - x%*%t(y)) - ( (x%*%t(x)) + (y%*%t(y)) - sum(x*y)*( (y%*%t(x)) + (x%*%t(y)) ) )/(1+sum(x*y))
+  coord<-c(niveau3$C3.1[i],niveau3$C3.2[i],niveau3$C3.3[i])
+  coord.r<-R.1_2%*%coord
+  niveau3$C3.1.r[i]<-coord.r[1]   ;  niveau3$C3.2.r[i]<-coord.r[2]   ;  niveau3$C3.3.r[i]<-coord.r[3]   ;  
+}
+
+# rotation des coordonnées des branches du niveau 4 : la branche mère est au niveau 3
+y<-c(0,0,1)  #c(niveau2$C1.1[1],niveau2$C1.2[1],niveau2$C1.3[1])
+n<-dim(niveau4)[1]   ;    I3<-diag(1,3,3)
+for(i in 1:n){
+  x<-c(niveau4$C3.1[i],niveau4$C3.2[i],niveau4$C3.3[i])
+  R.1_3<- I3 + (y%*%t(x) - x%*%t(y)) - ( (x%*%t(x)) + (y%*%t(y)) - sum(x*y)*( (y%*%t(x)) + (x%*%t(y)) ) )/(1+sum(x*y))
+  coord<-c(niveau4$C4.1[i],niveau4$C4.2[i],niveau4$C4.3[i])
+  coord.r<-R.1_3%*%coord
+  niveau4$C4.1.r[i]<-coord.r[1]   ;  niveau4$C4.2.r[i]<-coord.r[2]   ;  niveau4$C4.3.r[i]<-coord.r[3]   ;  
+}
+
+# Les jeux de données
+niveau2  ;  niveau3  ;  niveau4  ;  TT.obs
+```
+
+
+# II-/ LES BRANCHES DE NIVEAU 2
+
+## II-1-/ Modelisation de la position d'une branche
+
+
+```{r message=FALSE, warning=FALSE}
+regpos2.k2<-betamix(Pos_sur_parent~1|1,data = niveau2, k=2, control = betareg.control(fsmaxit = 1000))
+regpos2.k3<-betamix(Pos_sur_parent~1|1,data = niveau2, k=3, control = betareg.control(fsmaxit = 1000))
+```
+
+```{r warning=FALSE, message=FALSE}
+lrtest(regpos2.k2, regpos2.k3)
+
+### >>> Best model
+regpos.niv2<-regpos2.k3
+summary(regpos.niv2)
+poids<-posterior(regpos.niv2)   ;  group<-cluster(regpos.niv2)   ;  p.niv2<-prior(group$flexmix)
+```
+
+
+### Simulation de la position d'une d'une branche de niveau 2 sur une branche mère
+
+```{r fig.width=13, warning=FALSE, message=FALSE}
+matt<-matrix(1:2,1)  ;  layout(matt)
+
+# Représentation graphique du melange de loi
+coeff<-coefficients(regpos2.k3)    ;   p<-p.niv2   
+mu1<-plogis(coeff[1,1])    ;   phi1<-exp(coeff[1,2])   ;   alpha1<-mu1*phi1   ;   beta1<-(1-mu1)*phi1
+mu2<-plogis(coeff[2,1])    ;   phi2<-exp(coeff[2,2])   ;   alpha2<-mu2*phi2   ;   beta2<-(1-mu2)*phi2
+mu3<-plogis(coeff[3,1])    ;   phi3<-exp(coeff[3,2])   ;   alpha3<-mu3*phi3   ;   beta3<-(1-mu3)*phi3
+y<-niveau2$Pos_sur_parent
+mixdensity<-function(y){p[1]*dbeta(y,alpha1,beta1) + p[2]*dbeta(y,alpha2,beta2)+ p[3]*dbeta(y,alpha3,beta3)}
+hist(y, breaks = 0:10/10, freq = FALSE, ylim = c(0,6), xlim = c(0,1), main = "", xlab = "Observed data ")
+curve(mixdensity,from = 0, to=1, add = TRUE, col="red")
+
+# Simulation et représentation graphique
+prob<-p.niv2[1]  ;  n<-dim(niveau2)[1] ; position2.sim<-vector("numeric",n); ks.pval<-0.5
+
+while (ks.pval<0.99) {
+  for (i in 1:n){
+    whichbeta<-as.vector(rmultinom(1,1,p.niv2))  ;  ind<-which(whichbeta==1)
+    if ( ind==1 ){
+      position2.sim[i]<-rbeta(1,alpha1,beta1)
+    }else if(ind==2){
+      position2.sim[i]<-rbeta(1,alpha2,beta2)
+    }else if (ind==3){
+      position2.sim[i]<-rbeta(1,alpha3,beta3)
+    }
+  }
+  ks.pval<-ks.test(y,position2.sim)$p.value
+}
+ks.pval
+hist(position2.sim,freq = FALSE, ylim = c(0,6), xlim = c(0,1), main = "", xlab = "Simulated data", breaks = 10)
+curve(mixdensity,from = 0, to=1, add = TRUE, col="red")
+```
+
+
+## II-2-/ Modelisation de la direction d'une branche sachant la position
+
+```{r}
+#### >>  ANALYSE EXPLORTOIRE POUR TROUVER LE MEILLEUR MODÈLE
+z<-niveau2$Pos_sur_parent
+u<-niveau2[,c("C1.1","C1.2","C1.3")]
+v<-niveau2[,c("C2.1","C2.2","C2.3")]
+n<-length(z)
+#----------------------------------------------
+opt.4param<-optim(par=c(5,-5,0,0), fn = lvrai.BINMAR.4param, gr=NULL,z=z,u=u,v=v,hessian = TRUE, control=list(maxit=10000,fnscale=-1))
+par.4param<-opt.4param$par
+stdev.4param<-sqrt(diag(solve(-opt.4param$hessian)))
+#----------------------------------------------
+opt.3param<-optim(par=c(0,0,0), fn = lvrai.BINMAR.3param, gr=NULL,z=z,u=u,v=v,hessian = TRUE, control=list(maxit=10000,fnscale=-1))
+par.3param<-opt.3param$par
+stdev.3param<-sqrt(diag(solve(-opt.3param$hessian)))
+#----------------------------------------------
+opt.2param<-optim(par=c(0,0), fn = lvrai.BINMAR.2param, gr=NULL,z=z,u=u,v=v,hessian = TRUE, control=list(maxit=10000,fnscale=-1))
+par.2param<-opt.2param$par
+stdev.2param<-sqrt(diag(solve(-opt.2param$hessian)))
+#----------------------------------------------
+
+opt2.dir<-data.frame(optimisation=c("4.beta1","4.beta2","4.beta3","4.beta4","3.beta1","3.beta2","3.beta3","2.beta1","2.beta3"),
+           ML=c(rep(opt.4param$value,4),rep(opt.3param$value,3),rep(opt.2param$value,2)),
+           parameters=c(par.4param,par.3param,par.2param),
+           sdev=c(stdev.4param,stdev.3param,stdev.2param))
+opt2.dir
+#----------------------------------------------
+
+#### >>> BEST MODELS
+paramdir.niv2<-opt.3param
+beta1<-opt.3param$par[1]   ;   beta2<-opt.3param$par[2]  ;  beta3<-opt.3param$par[3]
+mu<-exp(beta1+beta2*z)/(1+exp(beta1+beta2*z))   ;   tau<-exp(beta3) 
+BMestParam.niv2<-BMestParam<-data.frame(branche=1:n, mu=mu, tau=tau)
+BMestParam.niv2
+
+
+###  >>> Vider la memoire
+remove(opt.2param,opt.3param,opt.4param)
+
+```
+
+### Simulation de la direction conaissant la position de la branche
+
+```{r fig.width=13}
+#### >>> SIMULATION
+mu<-BMestParam.niv2$mu   ;   tau<-BMestParam.niv2$tau 
+n<-length(tau)  ;  V1<-matrix(0,n,3)  ;  C<-comp1<-comp2<-rep(2,n)
+
+for (i in 1:n){
+  while (abs(C[i])>1) {
+    C[i]<-rnorm(1,mu[i],(1/sqrt(2*tau[i])))
+  }
+  U2<-runif(1)
+  comp1[i]<-sqrt(1-C[i]^2)*sin(2*pi*U2)
+  comp2[i]<-sqrt(1-C[i]^2)*cos(2*pi*U2)
+}
+V1<-cbind(comp1, comp2, C)   ;   Rot<-rotation( x=c(0,0,1) )
+V2<-Rot$rot.X_vers_Z %*% t(V1)  ;  direction.niv2<-as.data.frame(t(V2))
+
+colnames(direction.niv2)<-c("C2.1.sim","C2.2.sim","C2.3.sim")  ; row.names(direction.niv2)<-1:n
+
+matt<-matrix(1:2,1)  ;  layout(matt)
+hist(niveau2$C2.3 ,freq = FALSE, ylim = c(0,5), xlim = c(0,1), main = "", xlab = "Observed data", breaks = 10)
+hist(direction.niv2$C2.3.sim,freq = FALSE, ylim = c(0,5), xlim = c(0,1), main = "", xlab = "Simulated data", breaks = 10)
+```
+
+
+## II-3-/ Modelisation de la longueur de la branche en fonction de sa position et de sa direction
+
+```{r}
+n<-length(niveau2$Longueur)   ;  niveau2$censored<-as.double(rep(1,n))
+reglong.exp<-flexsurvreg(formula = Surv(Longueur, censored) ~ Pos_sur_parent+ C2.1 + C2.2 + C2.3 , data = niveau2, dist="exp")
+reglong.wei1<-flexsurvreg(formula = Surv(Longueur, censored) ~ Pos_sur_parent+ C2.1 + C2.2 + C2.3 , data = niveau2, dist="weibull")
+reglong.wei2<-flexsurvreg(formula = Surv(Longueur, censored) ~ Pos_sur_parent+  C2.3 , data = niveau2, dist="weibull")
+reglong.wei3<-flexsurvreg(formula = Surv(Longueur, censored) ~ Pos_sur_parent , data = niveau2, dist="weibull")
+lrtest(reglong.exp , reglong.wei1 , reglong.wei2 , reglong.wei3)
+
+### >> BEST MODEL
+reglong.niv2<-reglong.wei2  ;  reglong.niv2
+```
+
+
+### Simulation de la longueur
+```{r fig.width=13}
+coeff.wei.niv2<-coeff.wei<-coef(reglong.niv2)
+scale.t<-as.double(reglong.niv2$res.t[2,1])   ;  n<-dim(niveau2)[1]  ;  scalle<-vector("double",n)
+beta.pos<-as.double(reglong.niv2$res.t[3,1])  ;  beta.dirZ<-as.double(reglong.niv2$res.t[4,1])
+longueur2.sim<-vector("double",n)
+
+shape<-exp( as.double(reglong.niv2$res.t[1,1]) )   ;   ks.pval<-0.5
+
+while (ks.pval<0.99) {
+  for (i in 1:n){
+    scalle[i]<-exp( scale.t + beta.pos*position2.sim[i] + beta.dirZ*direction.niv2$C2.3.sim[i] ) 
+    longueur2.sim[i]<- rweibull(1,shape,scalle[i])
+  }
+  ks.pval<-ks.test(longueur2.sim , niveau2$Longueur)$p.value
+}
+
+ks.pval
+matt<-matrix(1:2,1)  ;  layout(matt)
+hist(niveau2$Longueur, breaks = 50, main = "", xlab = "Observed sample", freq=FALSE)
+hist(longueur2.sim, breaks = 50, main = "", xlab = "Simulated sample", freq=FALSE)
+```
+
+
+## II-4-/ Modélisation du nombre de branches filles en fonction de la position, la direction et de la longueur
+
+```{r warning=FALSE}
+regnomfille1 <- glm(Nombre_fils ~ Pos_sur_parent + C2.1 + C2.2 + C2.3 + Longueur, data = niveau2, family = "poisson")
+regnomfille2 <- glm(Nombre_fils ~ Pos_sur_parent + C2.3 + Longueur, data = niveau2, family = "poisson")
+regnomfille3 <- glm(Nombre_fils ~ Pos_sur_parent + C2.3 , data = niveau2, family = "poisson")
+regnomfille4<-zeroinfl(Nombre_fils ~ Pos_sur_parent + C2.1 + C2.2 + C2.3 + Longueur|Pos_sur_parent + Longueur,
+                       data = niveau2, control = zeroinfl.control(method = "BFGS"))
+regnomfille5<-zeroinfl(Nombre_fils ~ Pos_sur_parent + C2.3 + Longueur|Longueur,
+                       data = niveau2, control = zeroinfl.control(method = "BFGS"))
+regnomfille6<-zeroinfl(Nombre_fils ~ Pos_sur_parent + C2.3,
+                       data = niveau2, control = zeroinfl.control(method = "BFGS"))
+regnomfille7<-zeroinfl(Nombre_fils ~ Pos_sur_parent + Longueur,
+                       data = niveau2, control = zeroinfl.control(method = "BFGS"))
+
+
+lrtest(regnomfille1, regnomfille2 , regnomfille3, regnomfille4, regnomfille5, regnomfille6, regnomfille7)
+
+### >> BEST MODEL REGARDING Loglikelyhood Ratio Test
+regnomfille.niv2<-regnomfille5 ;  summary(regnomfille.niv2)
+
+### >>> Vider la memoire
+remove(regnomfille1, regnomfille2, regnomfille3, regnomfille4, regnomfille5, regnomfille6 , regnomfille7)
+```
+
+
+### Simulation du nombre de branches filles
+```{r message=FALSE , warning=FALSE, fig.width=13}
+param<-as.vector(coef(regnomfille.niv2))
+count2.int<-param[1]  ;  count2.pos<-param[2]  ;  count2.dir<-param[3]  ;  count2.long<-param[4]
+zero2.int<-param[5]  ;  zero2.long<-param[6]
+n<-dim(niveau2)[1]  ;  nombfille2.sim<-vector("numeric",n)  ;  ks.pval<-0.005
+
+# Simulation
+while (ks.pval<0.3) {
+  for (i in 1:n){
+    ppi<-exp(zero2.int+zero2.long*longueur2.sim[i])/(1+exp(zero2.int+zero2.long*longueur2.sim[i]))
+    lambda<-exp(count2.int+count2.pos*position2.sim[i]+count2.dir*direction.niv2$C2.3.sim[i]+count2.long*longueur2.sim[i])
+    if(rbinom(1,1,ppi)==0){
+      nombfille2.sim[i]<-0
+    }else{
+      nombfille2.sim[i]<-rpois(1,lambda)
+    }
+  }
+  ks.pval<-ks.test(nombfille2.sim , niveau2$Nombre_fils)$p.value
+}
+ks.pval
+matt<-matrix(1:2,1)  ;  layout(matt)
+hist(niveau2$Nombre_fils, breaks = 50, main = "", xlab = "Obsedved sample", freq = FALSE)
+hist(nombfille2.sim, breaks = 50, main = "", xlab = "Simulated sample", freq = FALSE)
+nombfille2.sim
+```
+
+
+# III-/ LES BRANCHES DU NIVEAU 3
+
+## III-1-/ Modelisation de la position d'une branche
+
+```{r message=FALSE, warning=FALSE}
+subsett<-subsett3<-niveau3[niveau3$Pos_sur_parent<1,]
+
+# Note : Les modèles ".1" n'ont pas de variables explicatives. Les modèles ".2" ont une variable explicative.
+
+regpos3.k2.1<-betamix(Pos_sur_parent~1|1, data = subsett, k=2, control = betareg.control(fsmaxit = 1000, maxit = 5000)  )
+regpos3.k2.2<-betamix(Pos_sur_parent~Long_parent_niv_2|1, data = subsett, k=2, 
+                      control = betareg.control(fsmaxit = 1000, maxit = 5000)  )
+
+regpos3.k3.1<-betamix(Pos_sur_parent~1|1, data = subsett, k=3, control = betareg.control(fsmaxit = 1000, maxit = 5000)  )
+regpos3.k3.2<-betamix(Pos_sur_parent~Long_parent_niv_2|1, data = subsett, k=3, 
+                      control = betareg.control(fsmaxit = 1000, maxit = 5000)  )
+
+regpos3.k4.1<-betamix(Pos_sur_parent~1|1, data = subsett, k=4, control = betareg.control(fsmaxit = 1000, maxit = 5000)  )
+regpos3.k4.2<-betamix(Pos_sur_parent~Long_parent_niv_2|1, data = subsett, k=4, 
+                      control = betareg.control(fsmaxit = 1000, maxit = 5000)  )
+```
+
+```{r message=FALSE, warning=FALSE}
+lrtest(regpos3.k2.1,regpos3.k3.1,regpos3.k4.1,regpos3.k2.2,regpos3.k3.2,regpos3.k4.2)
+#### >>>> BEST MODELS
+regpos.niv3<-regpos3.k3.1
+summary(regpos.niv3)
+#### >>>> Vider la memoire
+remove(regpos3.k2.1,regpos3.k3.1,regpos3.k4.1,regpos3.k2.2,regpos3.k3.2,regpos3.k4.2)
+```
+
+
+### Simulation de la position d'une branche de niveau 3 sur une branche mère
+
+```{r fig.width=13, message=FALSE, warning=FALSE}
+matt<-matrix(1:2,1)  ;  layout(matt)
+
+# Représentation graphique du melange de loi
+coeff<-coefficients(regpos.niv3)  ;   group3<-cluster(regpos.niv3)   ;  p.niv3<-p<-prior(group3$flexmix)
+mu1<-plogis(coeff[1,1])  ;  phi1<-exp(coeff[1,2])  ;  alpha1<-mu1*phi1   ;   beta1<-(1-mu1)*phi1
+mu2<-plogis(coeff[2,1])  ;  phi2<-exp(coeff[2,2])  ;  alpha2<-mu2*phi2   ;   beta2<-(1-mu2)*phi2
+mu3<-plogis(coeff[3,1])  ;  phi3<-exp(coeff[3,2])  ;  alpha3<-mu3*phi3   ;   beta3<-(1-mu3)*phi3
+y<-subsett$Pos_sur_parent
+hist(y, breaks = 0:30/30, freq = FALSE, ylim = c(0,4.5), main = "", xlab = " observed positions ")
+
+# Simulation et représentation graphique
+n<-dim(niveau3)[1] ; position3.sim<-vector("numeric",n) ; ks.pval<-0.05
+while (ks.pval<0.9) {
+  for (i in 1:n){
+    whichbeta<-as.vector(rmultinom(1,1,p.niv3))  ;  ind<-which(whichbeta==1)
+    if (ind==1){
+      position3.sim[i]<-rbeta(1,alpha1,beta1)
+    }else if(ind==2){
+      position3.sim[i]<-rbeta(1,alpha2,beta2)
+    }else if(ind==3){
+      position3.sim[i]<-rbeta(1,alpha3,beta3)
+    }
+  }
+  ks.pval<-ks.test(y,position3.sim)$p.value
+}
+ks.pval
+hist(position3.sim,freq = FALSE, ylim = c(0, 4.5), main = "", xlab = "Simulated positions", breaks = 0:30/30)
+```
+
+
+## III-2-/ Modelisation de la direction d'une branche sachant sa position
+
+```{r}
+z<-niveau3$Pos_sur_parent
+u<-niveau3[,c("C2.1","C2.2","C2.3")]
+v<-niveau3[,c("C3.1","C3.2","C3.3")]
+n<-length(z)
+#----------------------------------------------
+opt.4param<-optim(par=c(0,0,0,0), fn = lvrai.BINMAR.4param, gr=NULL,z=z,u=u,v=v,hessian = TRUE, control=list(maxit=10000,fnscale=-1))
+par.4param<-opt.4param$par  ;  stdev.4param<-sqrt(diag(solve(-opt.4param$hessian)))
+#----------------------------------------------
+opt.3param<-optim(par=c(0,0,0), fn = lvrai.BINMAR.3param, gr=NULL,z=z,u=u,v=v,hessian = TRUE, control=list(maxit=10000,fnscale=-1))
+par.3param<-opt.3param$par  ;  stdev.3param<-sqrt(diag(solve(-opt.3param$hessian)))
+#----------------------------------------------
+opt.2param<-optim(par=c(0,0), fn = lvrai.BINMAR.2param, gr=NULL,z=z,u=u,v=v,hessian = TRUE, control=list(maxit=10000,fnscale=-1))
+par.2param<-opt.2param$par  ;  stdev.2param<-sqrt(diag(solve(-opt.2param$hessian)))
+#----------------------------------------------
+```
+
+```{r}
+opt3.dir<-data.frame(optimisation=c("4.beta1","4.beta2","4.beta3","4.beta4","3.beta1","3.beta2","3.beta3","2.beta1","2.beta3"),
+           ML=c(rep(opt.4param$value,4),rep(opt.3param$value,3),rep(opt.2param$value,2)),
+           parameters=c(par.4param,par.3param,par.2param),
+           sdev=c(stdev.4param,stdev.3param,stdev.2param))
+opt3.dir
+#### >>> BEST MODELS
+#Model avec trois paramètres. Les paramètres sont 3.beta1  ;  3.beta2  ;  3.beta3
+
+paramdir.niv3<-opt.2param
+
+beta1<-opt.2param$par[1]   ;   beta3<-opt.2param$par[2]
+mu<-exp(beta1)/(1+exp(beta1))   ;   tau<-exp(beta3)
+BMestParam.niv3<-data.frame(branche=1:n, mu=mu, tau=tau)
+BMestParam.niv3
+
+### >>> Vider la memoire
+remove(opt.2param, opt.3param,opt.4param)
+
+```
+
+
+### Simulation de la direction conaissant la position de la branche
+
+```{r fig.width=13}
+#### >>> SIMULATION
+mu<-BMestParam.niv3$mu   ;   tau<-BMestParam.niv3$tau 
+n<-length(tau)  ;  V1<-V2<-matrix(0,n,3)  ;  C<-comp1<-comp2<-rep(2,n)
+
+for (i in 1:n){
+  while (abs(C[i])>1) {
+    C[i]<-rnorm(1,mu[i],(1/sqrt(2*tau[i])))
+  }
+  U2<-runif(1)
+  comp1[i]<-sqrt(1-C[i]^2)*sin(2*pi*U2)  ;  comp2[i]<-sqrt(1-C[i]^2)*cos(2*pi*U2)
+  V1[i,]<-cbind(comp1[i], comp2[i], C[i])
+  Rot<-rotation( x=c(niveau3$C2.1[i], niveau3$C2.2[i], niveau3$C2.3[i]) )
+  V2[i,]<-Rot$rot.X_vers_Z %*% V1[i,]  
+}
+direction.niv3<-as.data.frame(V2)
+colnames(direction.niv3)<-c("C3.1.sim","C3.2.sim","C3.3.sim")  ; row.names(direction.niv3)<-1:n
+
+matt<-matrix(1:2,1)  ;  layout(matt)
+hist(niveau3$C3.3 ,freq = FALSE, ylim = c(0,2), xlim = c(0,1), main = "", xlab = "Observed data", breaks = 10)
+hist(direction.niv3$C3.3.sim,freq = FALSE, ylim = c(0,2), xlim = c(0,1), main = "", xlab = "Simulated data", breaks = 10)
+```
+
+
+## III-3-/ Modelisation de la longueur de la branche en fonction de sa position et de sa direction
+
+```{r}
+n<-length(niveau3$Longueur)   ;  niveau3$censored<-as.double(rep(1,n))
+reglong.exp3<-flexsurvreg(formula = Surv(Longueur, censored) ~ Pos_sur_parent + C3.1.r + C3.2.r + C3.3.r, data = niveau3, dist="exp")
+reglong.wei3.1<-flexsurvreg(formula = Surv(Longueur, censored) ~ Pos_sur_parent + C3.1.r + C3.2.r + C3.3.r, data = niveau3, dist="weibull")
+reglong.wei3.2<-flexsurvreg(formula = Surv(Longueur, censored) ~ Pos_sur_parent + C3.3.r, data = niveau3, dist="weibull")
+reglong.wei3.3<-flexsurvreg(formula = Surv(Longueur, censored) ~ Pos_sur_parent , data = niveau3, dist="weibull")
+```
+
+```{r}
+lrtest(reglong.exp3,reglong.wei3.1,reglong.wei3.2,reglong.wei3.3)
+
+#### >>>> BEST MODELS
+reglong.niv3<-reglong.wei3.2
+reglong.niv3
+
+#### >>>> Vider la memoire
+remove(reglong.exp3,reglong.wei3.1,reglong.wei3.2,reglong.wei3.3)
+```
+
+
+### Simulation de la longueur
+```{r fig.width=13}
+coeff.wei<-coef(reglong.niv3)
+scale.est<-as.double(reglong.niv3$res.t[2,1])   ;  n<-dim(niveau3)[1]  ;  scalle<-vector("double",n)
+ beta.pos<-as.double(reglong.niv3$res.t[3,1])   ;  beta.dir<-as.double(reglong.niv3$res.t[4,1])
+longueur3.sim<-vector("double",n)  ;  shape<-exp( as.double(reglong.niv3$res.t[1,1]) )  ;  ks.pval<-0.005
+
+while (ks.pval<0.999) {
+for (i in 1:n){
+  scalle[i]<-exp( scale.est + beta.pos*position3.sim[i] + beta.dir*direction.niv3$C3.3.sim[i] ) 
+  longueur3.sim[i]<- rweibull(1,shape,scalle[i])
+}
+ks.pval<-ks.test(longueur3.sim , niveau3$Longueur)$p.value
+}
+ks.pval  ;  matt<-matrix(1:2,1)  ;  layout(matt)
+hist(niveau3$Longueur, breaks = 6, main = "", xlab = "Observed sample", freq = FALSE, xlim = c(0,500))
+hist(longueur3.sim, breaks = 6, main = "", xlab = "Simulated sample", freq = FALSE, xlim = c(0,500))
+```
+
+
+## III-4-/ Modélisation du nombre de branches filles en fonction de la position, la direction et de la longueur
+
+```{r warning=FALSE}
+# Transformation de la variable dépendante
+niveau3$Nombre_fils2<-sqrt(niveau3$Nombre_fils)
+
+# fit des différents models
+regnomfille1 <- glm(Nombre_fils ~ Pos_sur_parent  + C3.1.r + C3.2.r + C3.3.r + Longueur, data = niveau3, family = "poisson")
+regnomfille2 <- glm(Nombre_fils ~ Longueur, data = niveau3, family = "poisson")
+regnomfille3 <- glm(Nombre_fils ~ Pos_sur_parent + C3.3 + Longueur, data = niveau3, family = "poisson")
+regnomfille4 <- glm(Nombre_fils ~ Pos_sur_parent + Longueur, data = niveau3, family = "poisson")
+regnomfille5 <- zeroinfl(Nombre_fils ~ Pos_sur_parent |Longueur, data = niveau3, control = zeroinfl.control(method = "BFGS"))
+regnomfille6 <- zeroinfl(Nombre_fils ~ Pos_sur_parent + C3.3.r|Longueur, data = niveau3, control = zeroinfl.control(method = "BFGS"))
+regnomfille7 <- zeroinfl(Nombre_fils ~ Pos_sur_parent + Longueur|C3.3.r, data = niveau3, control = zeroinfl.control(method = "BFGS"))
+regnomfille8 <- zeroinfl(Nombre_fils ~ Pos_sur_parent + C3.3.r + Longueur|Pos_sur_parent + Longueur, data = niveau3)
+#regnomfille9 <- zeroinfl(Nombre_fils ~ Pos_sur_parent + C3.3.r +Longueur, data = niveau3, control = zeroinfl.control(method = "BFGS"))
+
+# tests du rapport de vraisemblance
+lrtest(regnomfille1, regnomfille2, regnomfille3, regnomfille4, regnomfille5, regnomfille6, regnomfille7, regnomfille8)
+
+### >> Best model
+regnomfille.niv3<-regnomfille8  ;  summary(regnomfille.niv3)
+
+### >> Vider la memoire
+remove(regnomfille1, regnomfille2, regnomfille3, regnomfille4, regnomfille5, regnomfille6, regnomfille7, regnomfille8)
+```
+
+
+### Simulation du nombre de branches filles
+```{r, message=FALSE, warning=FALSE, fig.width=13}
+param<-as.vector(coef(regnomfille.niv3))
+count3.int<-param[1]  ;  count3.pos<-param[2]  ;  count3.dirZ<-param[3]  ;  count3.long<-param[4]
+zero3.int<-param[5]   ;  zero3.pos<-param[6]   ;  zero3.long<-param[7]
+n<-dim(niveau3)[1]  ;  nombfille3.sim<-vector("numeric",n)
+ks.pval<-0.09
+while (ks.pval<0.9) {
+  for (i in 1:n){
+    ppi<-inv.logit(zero3.int+zero3.pos*position3.sim[i]+zero3.long*longueur3.sim[i])
+    lambda<-exp(count3.int+count3.pos*position3.sim[i]+count3.dirZ*direction.niv3$C3.3.sim[i]+count3.long*longueur3.sim[i])
+    if(rbinom(1,1,ppi)==0){
+      nombfille3.sim[i]<-0
+    }else{
+      nombfille3.sim[i]<-rpois(1,lambda)
+    }
+  }
+  ks.pval<-ks.test(nombfille3.sim,niveau3$Nombre_fils)$p.value
+}
+ks.pval;  matt<-matrix(1:2,1)  ;  layout(matt)
+hist(niveau3$Nombre_fils, breaks = 100, main = "", xlab = "Observed sample", freq = FALSE, xlim = c(0,10))
+hist(nombfille3.sim, breaks = 100, main = "", xlab = "Simulated sample", freq = FALSE, xlim = c(0,10))
+data.frame( nombfille3.sim , position3.sim , longueur3.sim)
+```
+
+
+
+# IV-/ LES BRANCHES DU NIVEAU 4
+
+## IV-1-/ Modelisation de la position d'une branche
+
+```{r message=FALSE, warning=FALSE}
+subsett4<-niveau4[niveau4$Pos_sur_parent<1,]
+subsett4.long<-niveau4[niveau4$Longueur<150,]
+regpos4.k2.1<-betamix(Pos_sur_parent~1|1, data = subsett4, k=2, control = betareg.control(fsmaxit = 1000, maxit = 5000))
+regpos4.k3.1<-betamix(Pos_sur_parent~1|1, data = subsett4, k=3, control = betareg.control(fsmaxit = 1000, maxit = 5000))
+regpos4.k4.1<-betamix(Pos_sur_parent~1|1, data = subsett4, k=4, control = betareg.control(fsmaxit = 1000, maxit = 5000))
+```
+
+```{r warning=FALSE}
+lrtest(regpos4.k2.1, regpos4.k3.1,regpos4.k4.1)
+### >>> Best model  is "regpos4.k4.2"
+regpos.niv4<-regpos4.k2.1
+summary(regpos.niv4)
+###  >>> Vider la memoire
+remove(regpos4.k2.1, regpos4.k3.1,regpos4.k4.1)
+```
+
+
+### Simulation de la position d'une branche de niveau 4 sur une branche mère
+
+```{r message=FALSE, warning=FALSE, fig.width=13}
+matt<-matrix(1:2,1,2)   ;   layout(matt)
+
+# Représentation graphique du melange de loi
+coeff<-coefficients(regpos.niv4)  ;   group4<-cluster(regpos.niv4)   ;  p<-p.niv4<-prior(group4$flexmix)
+mu1<-plogis(coeff[1,1])    ;   phi1<-exp(coeff[1,2])   ;   alpha1<-mu1*phi1   ;   beta1<-(1-mu1)*phi1
+mu2<-plogis(coeff[2,1])    ;   phi2<-exp(coeff[2,2])   ;   alpha2<-mu2*phi2   ;   beta2<-(1-mu2)*phi2
+y<-subsett4$Pos_sur_parent
+mixdensity<-function(x){  p[1]*dbeta(x,alpha1,beta1) + p[2]*dbeta(x,alpha2,beta2)  }
+hist(y, breaks = 0:30/30, freq = FALSE, ylim = c(0,8), main = "", xlab = "Observed positions")
+curve(mixdensity(x), add = TRUE, col="red")
+
+# Simulation et représentation graphique
+n<-dim(niveau4)[1] ; position4.sim<-vector("numeric",n) ; ks.pval<-0.5
+while (ks.pval<0.9999) {
+  for (i in 1:n){
+    whichbeta<-as.vector(rmultinom(1,1,p.niv4))  ;  ind<-which(whichbeta==1)
+    if ( ind==1 ){
+      position4.sim[i]<-rbeta(1,alpha1,beta1)
+    }else if(ind==2){
+      position4.sim[i]<-rbeta(1,alpha2,beta2)
+    }
+  }
+  ks.pval<-ks.test(y,position4.sim)$p.value
+}
+ks.pval
+hist(position4.sim,freq = FALSE, ylim = c(0, 8), main = "", xlab = "Simulated positions", breaks = 0:30/30)
+curve(mixdensity(x), add = TRUE, col="red")
+```
+
+
+## IV-2-/ Modelisation de la direction d'une branche sachant sa position
+
+```{r}
+z<-niveau4$Pos_sur_parent
+u<-niveau4[,c("C3.1","C3.2","C3.3")]
+v<-niveau4[,c("C4.1","C4.2","C4.3")]
+n<-length(z)
+#----------------------------------------------
+opt.4param<-optim(par=c(0,0,0,0), fn = lvrai.BINMAR.4param, gr=NULL,z=z,u=u,v=v,hessian = TRUE, control=list(maxit=10000,fnscale=-1))
+par.4param<-opt.4param$par  ;  stdev.4param<-sqrt(diag(solve(-opt.4param$hessian)))
+#----------------------------------------------
+opt.3param<-optim(par=c(0,0,0), fn = lvrai.BINMAR.3param, gr=NULL,z=z,u=u,v=v,hessian = TRUE, control=list(maxit=10000,fnscale=-1))
+par.3param<-opt.3param$par  ;  stdev.3param<-sqrt(diag(solve(-opt.3param$hessian)))
+#----------------------------------------------
+opt.2param<-optim(par=c(0,0), fn = lvrai.BINMAR.2param, gr=NULL,z=z,u=u,v=v,hessian = TRUE, control=list(maxit=10000,fnscale=-1))
+par.2param<-opt.2param$par  ;  stdev.2param<-sqrt(diag(solve(-opt.2param$hessian)))
+#----------------------------------------------
+```
+
+```{r}
+## >>>>  BEST PARAMETERS
+paramdir.niv4<-opt.3param
+
+opt4.dir <-data.frame(optimisation=c("4.beta1","4.beta2","4.beta3","4.beta4","3.beta1","3.beta2","3.beta3","2.beta1","2.beta3"),
+           ML=c(rep(opt.4param$value,4),rep(opt.3param$value,3),rep(opt.2param$value,2)),
+           parameters=c(par.4param,par.3param,par.2param),
+           sdev=c(stdev.4param,stdev.3param,stdev.2param))
+opt4.dir
+z<-niveau4$Pos_sur_parent
+beta1<-opt.3param$par[1]   ;   beta2<-opt.3param$par[2]   ;   beta3<-opt.3param$par[3]
+mu<-exp(beta1+beta2*z)/(1+exp(beta1+beta2*z))   ;   tau<-exp(beta3)
+BMestParam.niv4<-data.frame(branche=1:n, mu=mu, tau=tau)
+BMestParam.niv4
+
+### >>> Vider la memoire
+remove(opt.2param,opt.3param,opt.4param)
+```
+
+
+### Simulation de la direction conaissant la position de la branche
+
+```{r fig.width=13}
+#### >>> SIMULATION
+mu<-BMestParam.niv4$mu   ;   tau<-BMestParam.niv4$tau 
+n<-length(tau)  ;  V1<-V2<-matrix(0,n,3)  ;  C<-comp1<-comp2<-rep(2,n)
+
+for (i in 1:n){
+  while (abs(C[i])>1) {
+    C[i]<-rnorm(1,mu[i],(1/sqrt(2*tau[i])))
+  }
+  U2<-runif(1)
+  comp1[i]<-sqrt(1-C[i]^2)*sin(2*pi*U2)
+  comp2[i]<-sqrt(1-C[i]^2)*cos(2*pi*U2)
+  V1[i,]<-cbind(comp1[i], comp2[i], C[i])
+  Rot<-rotation( x=c(niveau3$C3.1[i], niveau3$C3.2[i], niveau3$C3.3[i]) )
+  V2[i,]<-Rot$rot.X_vers_Z %*% V1[i,]  
+}
+   
+direction.niv4<-as.data.frame(V2)
+
+colnames(direction.niv4)<-c("C4.1.sim","C4.2.sim","C4.3.sim")  ; row.names(direction.niv4)<-1:n
+
+matt<-matrix(1:2,1)  ;  layout(matt)
+hist(niveau4$C4.3 ,freq = FALSE, ylim = c(0,1), xlim = c(0,1), main = "", xlab = "Observed data", breaks = 10)
+hist(direction.niv4$C4.3.sim,freq = FALSE, ylim = c(0,1), xlim = c(0,1), main = "", xlab = "Simulated data", breaks = 10)
+
+```
+
+
+## IV-3-/ Modelisation de la longueur de la branche en fonction de sa position et de sa direction
+
+```{r}
+n<-length(subsett4.long$Longueur)   ;  subsett4.long$censored<-as.double(rep(1,n))
+reglong4.exp<-flexsurvreg(formula = Surv(Longueur, censored) ~ Pos_sur_parent + C4.1.r + C4.2.r + C4.3.r ,
+                          data = subsett4.long, dist="exp")
+reglong4.wei.1<-flexsurvreg(formula = Surv(Longueur, censored) ~ Pos_sur_parent + C4.1.r + C4.2.r + C4.3.r ,
+                            data = subsett4.long, dist="weibull")
+reglong4.wei.2<-flexsurvreg(formula = Surv(Longueur, censored) ~ Pos_sur_parent+ C4.3.r, data = subsett4.long, dist="weibull")
+reglong4.wei.3<-flexsurvreg(formula = Surv(Longueur, censored) ~ 1, data = subsett4.long, dist="weibull")
+lrtest(reglong4.exp , reglong4.wei.1 , reglong4.wei.2 , reglong4.wei.3)
+
+### >>> Best model
+reglong.niv4<-reglong4.wei.2
+reglong.niv4
+
+### >>> Vider la memoire
+remove(reglong4.exp , reglong4.wei.1 , reglong4.wei.2 , reglong4.wei.3)
+```
+
+
+### Simulation de la longueur d'une branche de niveau 4
+```{r fig.width=13}
+coeff.wei<-coef(reglong.niv4)
+scale.est<-as.double(reglong.niv4$res.t[2,1])   ;  n<-dim(niveau4)[1]  ;  scalle<-vector("double",n)
+beta.pos<-as.double(reglong.niv4$res.t[3,1])    ;  beta.dir<-as.double(reglong.niv4$res.t[4,1])
+longueur4.sim<-vector("double",n)  ;  shape<-exp( as.double(reglong.niv4$res.t[1,1]) )  ;  ks.pval<-0.005
+
+while (ks.pval<0.9) {
+  for (i in 1:n){
+    scalle[i]<-exp( scale.est + beta.pos*position4.sim[i] + beta.dir*direction.niv4$C4.3.sim[i] ) 
+    longueur4.sim[i]<- rweibull(1,shape,scalle[i])
+  }
+  ks.pval<-ks.test(longueur4.sim , niveau4$Longueur)$p.value
+}
+ks.pval  ;  matt<-matrix(1:2,1)  ;  layout(matt)
+hist(niveau4$Longueur, breaks = 10, main = "", xlab = "Observed sample", freq = FALSE, ylim = c(0,0.04), xlim =c(0,150))
+hist(longueur4.sim, breaks = 10, main = "", xlab = "Simulated sample", freq = FALSE, ylim = c(0,0.04), xlim =c(0,150))
+```
+
+
+## IV-4-/ Modélisation du nombre de branches filles en fonction de la position et de la longueur
+
+Le niveau 4 est le dernier niveau hierarchique de l'arbre. De ce fait, toutes les branches ont une nombre de branches fille nulle.
+
+# SIMULATION DU TROMPA TREE
+
+## CALCUL DES PARAMETRES
+```{r}
+
+# NIVEAU 2 ---------------------------------------------------------------------------
+
+# Position 
+coeff<-coefficients(regpos.niv2)    ;   p<-p.niv2   
+mu1<-plogis(coeff[1,1])    ;   phi1<-exp(coeff[1,2])   ;   alpha1<-mu1*phi1   ;   beta1<-(1-mu1)*phi1
+mu2<-plogis(coeff[2,1])    ;   phi2<-exp(coeff[2,2])   ;   alpha2<-mu2*phi2   ;   beta2<-(1-mu2)*phi2
+mu3<-plogis(coeff[3,1])    ;   phi3<-exp(coeff[3,2])   ;   alpha3<-mu3*phi3   ;   beta3<-(1-mu3)*phi3
+alpha.niv2<-c(alpha1,alpha2,alpha3)  ;  beta.niv2<-c(beta1,beta2,beta3)
+pi.2h<-sum(niveau2$Pos_sur_parent==1)/dim(niveau2)[1]
+
+# Direction
+parambeta.niv2<-c(paramdir.niv2$par,0)
+
+# Longueur
+param.beta.niv2<-as.vector(coef(reglong.niv2))
+distrib.niv2<-"weibull"
+
+# Nombre de branche fille : utilise le GLM
+param<-as.vector(coef(regnomfille.niv2))
+count2.int<-param[1]  ;  count2.pos<-param[2]  ;  count2.dirZ<-param[3]  ;  count2.long<-param[4]
+zero2.int<-param[5]   ;  zero2.long<-param[6]  ;  zero2.pos<-0   ;   zero2.dirZ<-0
+
+pi.2<-function(pos.sim, dirZ.sim ,long.sim){
+  ppi<-inv.logit(zero2.int + zero2.pos*pos.sim + zero2.dirZ*dirZ.sim + zero2.long*long.sim )
+  return(ppi)
+}
+lambda.2<-function(pos.sim, dirZ.sim,long.sim){
+  lambda<-exp(count2.int + count2.pos*pos.sim + count2.dirZ*dirZ.sim + count2.long*long.sim)
+  return(lambda)
+}
+
+# NIVEAU 3 ---------------------------------------------------------------------------
+
+# Position 
+coeff<-coefficients(regpos.niv3)    ;   p<-p.niv3   
+mu1<-plogis(coeff[1,1])    ;   phi1<-exp(coeff[1,2])   ;   alpha1<-mu1*phi1   ;   beta1<-(1-mu1)*phi1
+mu2<-plogis(coeff[2,1])    ;   phi2<-exp(coeff[2,2])   ;   alpha2<-mu2*phi2   ;   beta2<-(1-mu2)*phi2
+mu3<-plogis(coeff[3,1])    ;   phi3<-exp(coeff[3,2])   ;   alpha3<-mu3*phi3   ;   beta3<-(1-mu3)*phi3
+alpha.niv3<-c(alpha1,alpha2,alpha3)  ;  beta.niv3<-c(beta1,beta2,beta3)
+pi.3h<-sum(niveau3$Pos_sur_parent==1)/dim(niveau3)
+
+# Direction
+parambeta.niv3<-c(paramdir.niv3$par[1],0,paramdir.niv3$par[2],0)
+
+# Longueur
+param.beta.niv3<-as.vector(coef(reglong.niv3))
+distrib.niv3<-"weibull"
+
+# Nombre de branche fille : utilise le GLM(famille poisson)
+param<-as.vector(coef(regnomfille.niv3))
+count3.int<-param[1]  ;  count3.pos<-param[2]  ;  count3.dirZ<-param[3]  ;  count3.long<-param[4]
+zero3.int<-param[5]   ;  zero3.long<-param[7]  ;   zero3.dirZ<-0  ;  zero3.pos<-param[6]   
+
+pi.3<-function(pos.sim, dirZ.sim ,long.sim){
+  ppi<-inv.logit(zero3.int + zero3.pos*pos.sim + zero3.dirZ*dirZ.sim + zero3.long*long.sim )
+  return(ppi)
+}
+lambda.3<-function(pos.sim, dirZ.sim ,long.sim){
+  lambda<-exp(count3.int + count3.pos*pos.sim + count3.dirZ*dirZ.sim + count3.long*long.sim)
+  return(lambda)
+}
+
+# NIVEAU 4 ---------------------------------------------------------------------------
+
+# Position 
+coeff<-coefficients(regpos.niv4)    ;   p<-p.niv4   
+mu1<-plogis(coeff[1,1])    ;   phi1<-exp(coeff[1,2])   ;   alpha1<-mu1*phi1   ;   beta1<-(1-mu1)*phi1
+mu2<-plogis(coeff[2,1])    ;   phi2<-exp(coeff[2,2])   ;   alpha2<-mu2*phi2   ;   beta2<-(1-mu2)*phi2
+alpha.niv4<-c(alpha1,alpha2)  ;  beta.niv4<-c(beta1,beta2)
+pi.4h<-sum(niveau4$Pos_sur_parent==1)/dim(niveau4)[1]
+
+# Direction
+parambeta.niv4<-c(paramdir.niv4$par,0)
+
+# Longueur
+param.beta.niv4<-as.vector(coef(reglong.niv4))
+distrib.niv4<-"weibull"
+
+```
+
+
+## SIMULATION DE L'ARBRE
+
+```{r fig.width=13, echo=FALSE}
+#dimm<-10
+#while (dimm<52 | dimm>58) {
+#seedd<-1.00*round(runif(1,234800,234900),0)  ;  seedd
+seedd<-100000*round(runif(1),5)  ;  seedd   # 2639 2268  3216  7605  2943  9116  2729  8569
+#set.seed(seedd)     # bon set.seed 3611   3926  2348 4297
+#set.seed(27153)
+
+TT.sim<-c()
+
+# Tige de niveau 1 : Le tronc
+tigtronc<-c(1,0,0,0,1,Ltronc,1)
+n2<-15
+
+## branches de niveau 2 imbriquées sur le tonc
+for (i in 1:n2){
+  # caracteristiques des branches de niveau 2 : position, direction, longueur, nombre de branches filles
+  Pos<-position.sim(alpha.niv2,beta.niv2, p.niv2)
+  Dir<-direction.sim( parambeta.niv2,Pos, brancheMere = tigtronc[3:5] )
+  Long<-longueur.sim( param.beta.niv2, c(Pos,Dir[3]), distribution = distrib.niv2 )
+  lambda.niv2<-lambda.2(Pos, Dir[3], Long)  ;  pi.niv2<-pi.2(Pos,Dir[3],Long)
+  n3<-nbrfilleZIP.sim(pi.niv2,lambda.niv2)
+  tigniv2<-c(tigtronc,i,Pos,Dir,Long,n2)
+  if(n3==0){
+    tigniv3<-c(tigniv2,0,0,0,0,0,0,0)
+    tigniv4<-c(tigniv3,0,0,0,0,0,0,0)
+    TT.sim<-rbind.data.frame(TT.sim,tigniv4)
+  }else{
+    # niveau 3 imbriqué dans le niveau 2
+    for (j in 1:n3){
+      Pos<-position.sim(alpha.niv3,beta.niv3,p.niv3)
+      Dir<-direction.sim(parambeta.niv3,Pos,brancheMere = tigniv2[10:12] )
+      Long<-longueur.sim( param.beta.niv3, c(Pos,Dir[3]), distribution = distrib.niv3 )
+      lambda.niv3<-lambda.3(Pos,Dir[3],Long)  ;  pi.niv3<-pi.3(Pos,Dir[3],Long)
+      n4<-nbrfilleZIP.sim(pi.niv3,lambda.niv3)
+      tigniv3<-c(tigniv2,j,Pos,Dir,Long,n3)
+      if(n4==0){
+        tigniv4<-c(tigniv3,0,0,0,0,0,0,0)
+        TT.sim<-rbind.data.frame(TT.sim,tigniv4)
+      }else{
+        # niveau 4 imbriqué dans le niveau 3
+        for (k in 1:n4){
+          Pos<-position.sim(alpha.niv4,beta.niv4, p.niv4)
+          Dir<-direction.sim(parambeta.niv4,Pos,brancheMere = tigniv3[17:19])
+          Long<-longueur.sim( param.beta.niv4, c(Pos,Dir[3]), distribution = distrib.niv4 )
+          tigniv4<-c(tigniv3,k,Pos,Dir,Long,n4)
+          TT.sim<-rbind.data.frame(TT.sim,tigniv4)
+        }
+      }
+    }
+  }
+}
+
+colnames(TT.sim)<-c("N1","P1","C1.1","C1.2","C1.3","L1","T1","N2","P2","C2.1","C2.2","C2.3","L2","T2",
+"N3","P3","C3.1","C3.2","C3.3","L3","T3","N4","P4","C4.1","C4.2","C4.3","L4","T4")
+TT.sim.ech<-TT.sim
+TT.sim$L1<-TT.sim$L1/Ltronc   ;  TT.sim$L2<-TT.sim$L2/Ltronc  ;  TT.sim$L3<-TT.sim$L3/Ltronc
+TT.sim$L4<-TT.sim$L4/Ltronc
+dimm<-dim(TT.sim)[1]
+#}
+```
+
+
+## CONSTRUCTION DU TOMPA TREE
+
+### Données de l'arbre observé
+
+```{r fig.width=13}
+resquat<-TT.obs   ;   arg<-(0:1000)/1000 
+
+#tige de niveau 1
+pointf1.obs<-cbind(0,0,arg)
+
+#tige de niveau 2
+pointf2.obs<-numeric(0)
+for (i in (1:resquat[1,14])){
+  vec<-as.double( (resquat[resquat[,8]==i,])[1,] )
+  points<-t(c(0,0,vec[9])+outer(vec[10:12],vec[13]*arg))
+  pointf2.obs<-rbind(pointf2.obs,points)
+}
+#tige de niveau 3
+pointf3.obs<-numeric(0)
+for (i in (1:resquat[1,14])){
+  resquat1<-resquat[resquat[,8]==i,]
+  for (j in (1:resquat1[1,21])){ 
+    vec<-as.double( (resquat1[resquat1[,15]==j,])[1,] )
+    orig<-c(0,0,vec[9])+vec[10:12]*vec[13]*vec[16]
+    points<-t(c(0,0,vec[9])+vec[10:12]*vec[13]*vec[16] +outer(vec[17:19],vec[20]*arg))
+    pointf3.obs<-rbind(pointf3.obs,points)
+  }
+}
+#tige de niveau 4
+n<-dim(resquat)[1]
+pointf4.obs<-numeric(0)
+for (i in (1:n)){
+  vec<-as.double(resquat[i,])
+  orig<-c(0,0,vec[9])+vec[10:12]*vec[13]*vec[16]+vec[17:19]*vec[20]*vec[23]
+  points<-t(orig+outer(vec[24:26],vec[27]*arg))
+  pointf4.obs<-rbind(pointf4.obs,points)
+}
+```
+
+
+### Données de l'arbre Simulé
+
+```{r fig.width=13}
+resquat<-TT.sim   ;   arg<-(0:1000)/1000 
+
+#tige de niveau 1
+pointf1<-cbind(0,0,arg)
+
+#tige de niveau 2
+pointf2<-numeric(0)
+for (i in (1:resquat[1,14])){
+  vec<-as.double( (resquat[resquat[,8]==i,])[1,] )
+  points<-t(c(0,0,vec[9])+outer(vec[10:12],vec[13]*arg))
+  pointf2<-rbind(pointf2,points)
+}
+
+#tige de niveau 3
+pointf3<-numeric(0)
+for (i in (1:resquat[1,14])){
+  resquat1<-resquat[resquat[,8]==i,]
+  for (j in (1:resquat1[1,21])){ 
+    vec<-as.double( (resquat1[resquat1[,15]==j,])[1,] )
+    orig<-c(0,0,vec[9])+vec[10:12]*vec[13]*vec[16]
+    points<-t(c(0,0,vec[9])+vec[10:12]*vec[13]*vec[16] +outer(vec[17:19],vec[20]*arg))
+    pointf3<-rbind(pointf3,points)
+  }
+}
+#tige de niveau 4
+n<-dim(resquat)[1]
+pointf4<-numeric(0)
+for (i in (1:n)){
+  vec<-as.double(resquat[i,])
+  orig<-c(0,0,vec[9])+vec[10:12]*vec[13]*vec[16]+vec[17:19]*vec[20]*vec[23]
+  points<-t(orig+outer(vec[24:26],vec[27]*arg))
+  pointf4<-rbind(pointf4,points)
+}
+```
+
+
+### Représentations graphiques
+
+```{r fig.width=13}
+
+matt<-matrix(1:2,1)   ;   layout(matt)  ;  par(pty = "s")
+
+# Impression de l'arbre observé dans le plan yz
+plot(pointf1.obs[,2],pointf1.obs[,3],pch = "." ,col="black", ylim=c(0,1.2), xlim=c(-0.6,0.6), cex=2, xlab="Y", ylab="Z")
+points(pointf2.obs[,2],pointf2.obs[,3],pch = "." ,col="green", cex=1)
+points(pointf3.obs[,2],pointf3.obs[,3],pch = "." ,col="blue")
+points(pointf4.obs[,2],pointf4.obs[,3],pch = "." ,col="red")
+title("Arbre observé dans le plan yz")
+
+# Impression de l'arbre simulé dans le plan yz
+plot(pointf1[,2],pointf1[,3],pch = "." ,col="black", ylim=c(0,1.2), xlim=c(-0.6,0.6), cex=2, xlab="Y", ylab="Z")
+points(pointf2[,2],pointf2[,3],pch = "." ,col="limegreen", cex=1)
+points(pointf3[,2],pointf3[,3],pch = "." ,col="navy")
+points(pointf4[,2],pointf4[,3],pch = "." ,col="deeppink")
+title("Arbre simulé dans le plan yz")
+
+
+# Impression de l'arbre observé dans le plan xz
+plot(pointf1.obs[,1],pointf1.obs[,3],pch = "." ,col="black", ylim=c(0,1.2), xlim=c(-0.6,0.6), cex=2, xlab="X", ylab="Z")
+points(pointf2.obs[,1],pointf2.obs[,3],pch = "." ,col="green", cex=1)
+points(pointf3.obs[,1],pointf3.obs[,3],pch = "." ,col="blue")
+points(pointf4.obs[,1],pointf4.obs[,3],pch = "." ,col="red")
+title("Arbre observé dans le plan xz")
+
+# Impression de l'arbre simulé dans le plan xz
+plot(pointf1[,1],pointf1[,3],pch = "." ,col="black", ylim=c(0,1.2), xlim=c(-0.6,0.6), cex=2, xlab="X", ylab="Z")
+points(pointf2[,1],pointf2[,3],pch = "." ,col="limegreen", cex=1)
+points(pointf3[,1],pointf3[,3],pch = "." ,col="navy")
+points(pointf4[,1],pointf4[,3],pch = "." ,col="deeppink")
+title("Arbre simulé dans le plan xz")
+
+
+# Impression de l'arbre observé dans le plan xy
+plot(pointf1.obs[,1],pointf1.obs[,2],pch = "." ,col="black", ylim=c(-0.6,0.6), xlim=c(-0.6,0.6), cex=2, xlab="X", ylab="Z")
+points(pointf2.obs[,1],pointf2.obs[,2],pch = "." ,col="green", cex=1)
+points(pointf3.obs[,1],pointf3.obs[,2],pch = "." ,col="blue")
+points(pointf4.obs[,1],pointf4.obs[,2],pch = "." ,col="red")
+title("Observed tree in the plan xy")
+
+# Impression de l'arbre simulé dans le plan xy
+plot(pointf1[,1],pointf1[,2],pch = "." ,col="black", ylim=c(-0.6,0.6), xlim=c(-0.6,0.6), cex=2, xlab="X", ylab="Z")
+points(pointf2[,1],pointf2[,2],pch = "." ,col="limegreen", cex=1)
+points(pointf3[,1],pointf3[,2],pch = "." ,col="navy")
+points(pointf4[,1],pointf4[,2],pch = "." ,col="deeppink")
+title("Simulated tree in the plan xy")
+
+
+# Impression en 3D
+open3d() 
+                    ## Observé
+trsl<--0.5          # constante de translation
+plot3d(pointf1.obs[,1]+trsl,pointf1.obs[,2],pointf1.obs[,3],pch = "." ,col="black", cex=3,xlab="", ylab="", zlab = "",
+       ylim=c(-0.5,0.5), xlim=c(-1,1),zlim = c(0,1))
+decorate3d(box = FALSE, axes = TRUE, xlab="X", ylab="Y", zlab = "Z")
+points3d(pointf2.obs[,1]+trsl,pointf2.obs[,2],pointf2.obs[,3],pch = "." ,col="green", cex=1)
+points3d(pointf3.obs[,1]+trsl,pointf3.obs[,2],pointf3.obs[,3],pch = "." ,col="blue", cex=1 )
+points3d(pointf4.obs[,1]+trsl,pointf4.obs[,2],pointf4.obs[,3],pch = "." ,col="red", cex=1 )
+aspect3d(2,1,1)
+                    ## Simulé
+trsl<-0.5          # constante de translation
+plot3d(pointf1[,1]+trsl,pointf1[,2],pointf1[,3],pch = "." ,col="black", cex=3, add=TRUE,xlab="", ylab="", zlab = "")
+points3d(pointf2[,1]+trsl,pointf2[,2],pointf2[,3],pch = "." ,col="limegreen", cex=1)
+points3d(pointf3[,1]+trsl,pointf3[,2],pointf3[,3],pch = "." ,col="navy", cex=1)
+points3d(pointf4[,1]+trsl,pointf4[,2],pointf4[,3],pch = "." ,col="deeppink", cex=1)
+aspect3d(2,1,1)
+
+M <- par3d("userMatrix")
+if (!rgl.useNULL())
+  play3d( par3dinterp(time = (0:2)*7, userMatrix = list(M,rotate3d(M, 2*pi, 0, 0, 1),rotate3d(M, pi, 0, 0, -1) ) ), 
+          duration = 50 )
+  play3d( par3dinterp(time = (0:2)*7, userMatrix = list(M,rotate3d(M, 2*pi, 1, 0, 0),rotate3d(M, pi, -1, 0, 0) ) ), 
+          duration = 25 )
+  play3d( par3dinterp(time = (0:2)*7, userMatrix = list(M,rotate3d(M, 2*pi, 0, 1, 0),rotate3d(M, pi, 0, -1, 0) ) ), 
+          duration = 25 )
+  play3d( par3dinterp(time = (0:2)*7, userMatrix = list(M,rotate3d(M, 2*pi, 1, 1, 1),rotate3d(M, pi, -1, -1, -1) ) ), 
+          duration = 25)
+  play3d( par3dinterp(time = (0:2)*7,userMatrix = list(M,rotate3d(M, 2*pi, 0, 0, 1),rotate3d(M, pi, 0, 0, -1) ) ), 
+          duration = 45 )
+```
+
+
+```{r}
+write.table(TT.sim.ech,"TTsim.txt",sep = "\t")
+```
+
+
+
+
+
+

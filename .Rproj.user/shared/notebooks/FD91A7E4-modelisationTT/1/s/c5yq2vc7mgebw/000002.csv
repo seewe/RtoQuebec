@@ -1,0 +1,5 @@
+"0","```r
+source(\"arbres.R\")
+library(betareg) ; library(flexsurv) ; library(lmtest); library(modeltools) ; library(pscl)  ;  library(simsurv)
+library(rgl)  ;  library(boot)  ; set.seed(800)
+```"
