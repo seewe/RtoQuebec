@@ -1,0 +1,8 @@
+library(blogdown)
+
+new_site(dir = ".", install_hugo = TRUE, format = "toml", 
+         sample = TRUE, theme = "Tazeg/hugo-blog-jeffprod", hostname = "github.com", 
+         theme_example = TRUE)
+
+
+
