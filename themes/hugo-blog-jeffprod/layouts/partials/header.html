@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="{{ $.Site.LanguageCode | default "en" }}">
+<html lang="{{ $.Site.LanguageCode | default "fr" }}">
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{ .Site.Title }} {{ with .Title }} | {{ . }}{{ end }}</title>
+    <!--<title>{{ .Site.Title }} {{ with .Title }} | {{ . }}{{ end }}-->
+    <title>{{ .Site.Title }} {{ with .Title }} {{ end }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
@@ -16,7 +17,9 @@
     <!-- nav -->
     <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-            <a class="navbar-item" href="{{ .Site.BaseURL | absURL }}">Home</a>
+            <a class="navbar-item" href="{{ .Site.BaseURL | absURL }}">
+                <img src="{{ .Site.BaseURL }}img/logo.png" alt="{{ .Site.Title }} Logo">
+            </a>
         </div>
     </nav>
     <!-- /nav -->

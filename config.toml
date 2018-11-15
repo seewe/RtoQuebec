@@ -1,11 +1,12 @@
-baseurl = "https://example.com"
-title = "Hugo Theme"
+#  https://example.com
+baseurl = "/"
+title = "SEE BLOG"
 author = "@JeffProd"
 copyright = "Copyright © 2008–2018, @JeffProd"
 canonifyurls = true
 paginate = 3
 theme = "hugo-blog-jeffprod"
-ignoreFiles = ["\\.Rmd$","\\.nb.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
+ignoreFiles = ["\\.Rmd$","\\.nb.html$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
 [taxonomies]
     tag = "tags"
