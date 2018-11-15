@@ -56,6 +56,12 @@
   </url>
   
   <url>
+    <loc>/</loc>
+    <lastmod>2018-11-14T15:35:17+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/development/</loc>
     <lastmod>2014-04-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -94,12 +100,6 @@
   <url>
     <loc>/tags/r-markdown/</loc>
     <lastmod>2015-07-23T21:13:14-05:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/</loc>
-    <lastmod>2018-11-14T15:35:17+00:00</lastmod>
     <priority>0</priority>
   </url>
   
