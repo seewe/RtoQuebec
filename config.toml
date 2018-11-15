@@ -1,6 +1,6 @@
 #  https://example.com
 baseurl = "/"
-title = "SEE BLOG"
+title = "RaQuébec"
 author = "@JeffProd"
 copyright = "Copyright © 2008–2018, @JeffProd"
 canonifyurls = true
