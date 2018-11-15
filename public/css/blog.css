@@ -1,11 +1,19 @@
-html,body {
-    font-family: 'Open Sans', sans-serif;
-    background: #F0F2F4;
-    }
+html,
+body {
+    font-family: 'Times New Roman', sans-serif;
+    background: rgb(237, 239, 241);
+}
+
 .hero-body {
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-    }
-.mysocial { color: hsl(0, 0%, 100%);}
-.mysocial:hover { color: hsl(0, 0%, 71%) }
+}
+
+.mysocial {
+    color: hsl(0, 11%, 89%);
+}
+
+.mysocial:hover {
+    color: hsl(0, 0%, 71%)
+}
