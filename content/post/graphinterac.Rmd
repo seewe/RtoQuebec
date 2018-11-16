@@ -46,7 +46,7 @@ head(etudiants,5)
 ## La structure de regroupement des étudiants
   Les figures ci-dessous montrent qu'il existe une structure de cooccurrence entre les étudiants. La théorie de cette méthode est developpée dans le tutoriel des `null models`.
 
-```{r echo=FALSE, fig.width=13}
+```{r echo=FALSE, fig.width=13, message=FALSE, warning=FALSE}
 # Chargement des codes sources
 source("F:/codeSources/fonctionsProjet.R")
 
@@ -54,7 +54,7 @@ source("F:/codeSources/fonctionsProjet.R")
 OBS.etud<-ObserIndicators(Mpa.etud)
 
 # Calcul de la matrice de distance observée
-OBSdist<-distance(Mpa.etud)  ; head(OBSdist,5)
+OBSdist<-distance(Mpa.etud)
 
 # Simulation des Mpa par la méthode du quasiswap
 Smpa.etud<-simulMpa(Mpa.etud, method = "quasiswap", simul = 1000)
@@ -95,7 +95,7 @@ for (i in 1:simul){
   simcooc<-distance(Smpa.etud[,,i])  ;  SIMcooc[,i]<-simcooc$cooc  ;  SIMsor[,i]<-simcooc$Sor
   setWinProgressBar(pb, i, title=paste( round(i/simul*100, 0),"% of iterations done (",i,")"))
 }  
-close(pb)  ;  cbind.data.frame( dim(SIMcooc)  ,  dim(SIMsor) )  ;  remove(simcooc)
+close(pb)
 
 # Les cooccurrences significatives
 combi<-dim(OBSdist)[1]
@@ -140,7 +140,7 @@ plot.igraph(g,
 ```
 
 ### Représentation du graphe interactif
-```{r fig.width=13}
+```{r fig.width=7}
 
 # Les noeuds du graphe
 vertx<-as.factor(vertex.attributes(g)$name)  ;  nnod<-length(vertx)
@@ -161,7 +161,7 @@ MyLinks<-data.frame(from=as.double(factor(netw3d.from,levels(vertx)))-1, # On fa
                     typeLink=as.factor(Test.cooc$sens.cooc ))  
 
 # Vecteur de couleur des liens entre les étudiants
-MyLinks$Linkcolor<-Colinks<-ifelse(MyLinks$typeLink=="Similarite","green","red")
+MyLinks$Linkcolor<-Colinks<-ifelse(MyLinks$typeLink=="Similarite","black","red")
 
 # Les jeux de données pour représenter le graphe
 head(MyNodes,3)
