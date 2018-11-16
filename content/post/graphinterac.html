@@ -8,7 +8,7 @@ menu:
 next: /tutorials/github-pages-blog
 prev: /tutorials/automated-deployments
 title: 'Construire un graphe interactif sous R'
-date: "2018-11-15 21:23:00"
+date: "2018-11-15 21:28:19"
 output:
   html_notebook:
     fig_width: 13
@@ -59,112 +59,28 @@ Un graphe est un modèle abstrait de dessins de réseaux reliant des objets. Ce 
 ## 8  Bertholo      Maxi 0.4444444 0.2857143    2
 ## 9  Bertholo  Sorelite 0.0000000 0.0000000    0
 ## 10 Bertholo    ThePig 0.2857143 0.1666667    1</code></pre>
-<pre><code>##          temp    N0  NODF Cscore
-## p.value 0.198 0.914 0.856  0.046</code></pre>
+<pre><code>##          temp   N0  NODF Cscore
+## p.value 0.808 0.91 0.848  0.036</code></pre>
 <p><img src="/post/graphinterac_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <pre><code>## NULL</code></pre>
 <pre><code>##   dim(SIMcooc) dim(SIMsor)
 ## 1          253         253
 ## 2         1000        1000</code></pre>
-<pre><code>##         from       to       Sor       Jac cooc p.val.cooc meanSimCooc
-## 1   Bertholo    Vanou 1.0000000 1.0000000    4      0.048       2.283
-## 9   Bertholo Sorelite 0.0000000 0.0000000    0      0.060       1.730
-## 11  Bertholo LaHossou 0.8888889 0.8000000    4      0.318       2.898
-## 18  Bertholo     Roma 0.2500000 0.1428571    1      0.210       2.292
-## 30     Vanou Sorelite 0.0000000 0.0000000    0      0.052       1.713
-## 32     Vanou LaHossou 0.8888889 0.8000000    4      0.298       2.881
-## 39     Vanou     Roma 0.2500000 0.1428571    1      0.212       2.298
-## 73   LeMaham HighTech 0.8571429 0.7500000    3      0.214       1.720
-## 76   LeMaham     Abib 0.8000000 0.6666667    2      0.280       0.843
-## 79   LeMaham    Afann 0.0000000 0.0000000    0      0.212       1.296
-## 80   LeMaham LeCherif 0.8000000 0.6666667    2      0.302       0.866
-## 86     Serge     Maxi 0.8888889 0.8000000    4      0.308       2.861
-## 90     Serge  Florent 0.8571429 0.7500000    3      0.256       1.752
-## 101    Reine    Nelly 0.8571429 0.7500000    3      0.254       1.751
-## 109    Reine    Borio 0.0000000 0.0000000    0      0.038       1.744
-## 112    Reine  Cedrico 0.2500000 0.1428571    1      0.210       2.287
-## 113    Reine     Roma 0.2500000 0.1428571    1      0.190       2.362
-## 117    Reine TheTouks 0.2500000 0.1428571    1      0.182       2.328
-## 119    Nelly     Maxi 0.2500000 0.1428571    1      0.232       2.192
-## 121    Nelly   ThePig 0.0000000 0.0000000    0      0.186       1.325
-## 123    Nelly  Florent 0.0000000 0.0000000    0      0.196       1.332
-## 125    Nelly    Borio 0.0000000 0.0000000    0      0.190       1.331
-## 128    Nelly  Cedrico 0.0000000 0.0000000    0      0.066       1.756
-## 133    Nelly TheTouks 0.0000000 0.0000000    0      0.044       1.793
-## 137    Astro LaHossou 0.8888889 0.8000000    4      0.320       2.897
-## 157     Maxi  Cedrico 0.8888889 0.8000000    4      0.296       2.881
-## 158     Maxi     Roma 0.8888889 0.8000000    4      0.258       2.873
-## 162     Maxi TheTouks 0.8888889 0.8000000    4      0.268       2.869
-## 164 Sorelite LaHossou 0.2500000 0.1428571    1      0.296       2.151
-## 171 Sorelite     Roma 0.8571429 0.7500000    3      0.254       1.760
-## 178   ThePig HighTech 0.8571429 0.7500000    3      0.232       1.707
-## 182   ThePig  Cedrico 0.8571429 0.7500000    3      0.244       1.728
-## 184   ThePig    Afann 0.0000000 0.0000000    0      0.222       1.286
-## 187   ThePig TheTouks 0.8571429 0.7500000    3      0.218       1.699
-## 203  Florent  Cedrico 0.8571429 0.7500000    3      0.266       1.770
-## 208  Florent TheTouks 0.8571429 0.7500000    3      0.248       1.743
-## 214 HighTech    Afann 0.0000000 0.0000000    0      0.052       1.760
-## 220    Borio  Cedrico 0.8571429 0.7500000    3      0.208       1.708
-## 221    Borio     Roma 0.8571429 0.7500000    3      0.230       1.735
-## 225    Borio TheTouks 0.8571429 0.7500000    3      0.214       1.702
-## 234     Abib     Roma 0.0000000 0.0000000    0      0.314       1.135
-## 236     Abib LeCherif 1.0000000 1.0000000    2      0.088       0.570
-## 243  Cedrico TheTouks 1.0000000 1.0000000    4      0.056       2.320
-## 245     Roma LeCherif 0.0000000 0.0000000    0      0.278       1.154
-##         sens.cooc
-## 1      Similarite
-## 9   Dissimilarite
-## 11     Similarite
-## 18  Dissimilarite
-## 30  Dissimilarite
-## 32     Similarite
-## 39  Dissimilarite
-## 73     Similarite
-## 76     Similarite
-## 79  Dissimilarite
-## 80     Similarite
-## 86     Similarite
-## 90     Similarite
-## 101    Similarite
-## 109 Dissimilarite
-## 112 Dissimilarite
-## 113 Dissimilarite
-## 117 Dissimilarite
-## 119 Dissimilarite
-## 121 Dissimilarite
-## 123 Dissimilarite
-## 125 Dissimilarite
-## 128 Dissimilarite
-## 133 Dissimilarite
-## 137    Similarite
-## 157    Similarite
-## 158    Similarite
-## 162    Similarite
-## 164 Dissimilarite
-## 171    Similarite
-## 178    Similarite
-## 182    Similarite
-## 184 Dissimilarite
-## 187    Similarite
-## 203    Similarite
-## 208    Similarite
-## 214 Dissimilarite
-## 220    Similarite
-## 221    Similarite
-## 225    Similarite
-## 234 Dissimilarite
-## 236    Similarite
-## 243    Similarite
-## 245 Dissimilarite</code></pre>
+<pre><code>##        from       to       Sor cooc p.val.cooc meanSimCooc     sens.cooc
+## 1  Bertholo    Vanou 1.0000000    4      0.056       2.310    Similarite
+## 9  Bertholo Sorelite 0.0000000    0      0.058       1.756 Dissimilarite
+## 11 Bertholo LaHossou 0.8888889    4      0.300       2.862    Similarite
+## 18 Bertholo     Roma 0.2500000    1      0.246       2.298 Dissimilarite
+## 30    Vanou Sorelite 0.0000000    0      0.046       1.731 Dissimilarite</code></pre>
 </div>
 <div id="representations-graphiques" class="section level2">
 <h2>Représentations graphiques</h2>
-<div id="representation-non-interactine" class="section level3">
-<h3>Représentation non interactine</h3>
+<div id="representation-du-graphe-non-interactif" class="section level3">
+<h3>Représentation du graphe non interactif</h3>
 <p><img src="/post/graphinterac_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 </div>
-<div id="representation-interactive" class="section level3">
-<h3>Représentation interactive</h3>
+<div id="representation-du-graphe-interactif" class="section level3">
+<h3>Représentation du graphe interactif</h3>
 <pre><code>##   student group size
 ## 1    Abib  grp1    5
 ## 2   Afann  grp4    5

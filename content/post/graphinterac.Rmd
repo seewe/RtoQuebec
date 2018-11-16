@@ -100,7 +100,7 @@ for (i in 1:combi){
     OBSdist$sens.cooc[i]<-"Dissimilarite"
   }
 }
-Test.cooc<-OBSdist[OBSdist$p.val.cooc<=0.40,]  ;  Test.cooc
+Test.cooc<-OBSdist[OBSdist$p.val.cooc<=0.40,]  ;  head(Test.cooc[,-4],5)
 
 ```
 
@@ -108,7 +108,7 @@ Test.cooc<-OBSdist[OBSdist$p.val.cooc<=0.40,]  ;  Test.cooc
 
 ## Représentations graphiques
 
-### Représentation non interactine
+### Représentation du graphe non interactif
 ```{r echo=FALSE}
 
 bdgraph<-Test.cooc[,c("from","to","Sor")]
@@ -127,7 +127,7 @@ plot.igraph(g,
 )
 ```
 
-### Représentation interactive
+### Représentation du graphe interactif
 ```{r echo=FALSE}
 vertx<-as.factor(vertex.attributes(g)$name)  ;  nnod<-length(vertx)
 netw3d.from<-as.character(Test.cooc$from)   ;  netw3d.to<-as.character(Test.cooc$to)
