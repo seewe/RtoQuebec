@@ -42,12 +42,10 @@ Mpa.etud<-as.matrix(etudiants[,-c(2,1)])  ;   row.names(Mpa.etud)<-etudiants[,1]
 head(etudiants,5)
 ```
 
-## La matrice de lien significatif entre les étudiants
+## La structure de regroupement des étudiants
+  Les figures ci-dessous montrent qu'il existe une structure de cooccurrence entre les étudiants. La théorie de cette méthode est developpée dans le tutoriel des `null models`.
 
-Le lien entre deux étudiants est mesuré par la distance de Sorensen. En fait, cette diatance mesure la similarité entre deux entités de la Mpa. Un lien est significatif lorsqu'il n'émane pas du hasard. La comparaison entre le hasard et la significativité d'un lien fera l'objet d'un autre tutoriel. Pour l'instant, le tutoriel présente la matrice de lien entre les étudiant et la représente grapgiquement.
-
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE}
 # Chargement des codes sources
 source("F:/codeSources/fonctionsProjet.R")
 
@@ -55,7 +53,7 @@ source("F:/codeSources/fonctionsProjet.R")
 OBS.etud<-ObserIndicators(Mpa.etud)
 
 # Calcul de la matrice de distance observée
-OBSdist<-distance(Mpa.etud)  ; head(OBSdist,10)
+OBSdist<-distance(Mpa.etud)  ; head(OBSdist,5)
 
 # Simulation des Mpa par la méthode du quasiswap
 Smpa.etud<-simulMpa(Mpa.etud, method = "quasiswap", simul = 1000)
@@ -78,7 +76,15 @@ hist(Sind.etud$temp, main = "Temp", freq = FALSE, xlab = "Temperature")  ;  abli
 hist(Sind.etud$n0, main = "N0", freq = FALSE, xlab = "N0")  ;  abline(v=OBS.etud$Obsn0, col="red")
 hist(Sind.etud$nodf, main = "NODF", freq = FALSE, xlab = "NODF")  ;  abline(v=OBS.etud$Obsnodf, col="red")
 hist(Sind.etud$Cscore, main = "Cscore", freq = FALSE, xlab = "Cscore")  ;  abline(v=OBS.etud$ObsCscore, col="red")
+```
 
+
+## La matrice de lien significatif entre les étudiants
+
+Pour étudier la cooccurrence détectée ci-dessus en profondeur, le tutoriel mesure le lien entre les étudiants. Ce lien est mesuré par la distance de Sorensen. Cette diatance mesure la similarité ou la dissimilarité entre deux entités de la Mpa. Un lien est significatif lorsqu'il n'émane pas du hasard. Le tutoriel calcule la matrice de lien entre les étudiant et la représente grapgiquement.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Calcul des distances sur les Mpa simulées
 nobs<-dim(OBSdist)[1] ; simul<-dim(Smpa.etud)[3]  
 SIMcooc<-matrix(0,nobs,simul) ;  SIMsor<-matrix(0,nobs,simul)  # matrice des indicateurs de cooc et Sor simulés

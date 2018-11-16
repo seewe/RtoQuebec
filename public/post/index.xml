@@ -6,7 +6,7 @@
     <description>Recent content in Posts on BLOGDOWNàQUÉBEC</description>
     <generator>Hugo -- gohugo.io</generator>
     <copyright>Copyright © 2008–2018, @JeffProd</copyright>
-    <lastBuildDate>Thu, 15 Nov 2018 21:28:19 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 15 Nov 2018 21:44:03 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,7 +14,7 @@
     <item>
       <title>Construire un graphe interactif sous R</title>
       <link>/post/graphinterac/</link>
-      <pubDate>Thu, 15 Nov 2018 21:28:19 +0000</pubDate>
+      <pubDate>Thu, 15 Nov 2018 21:44:03 +0000</pubDate>
       
       <guid>/post/graphinterac/</guid>
       <description>INTRODUCTIONLa représentation graphique des données reste un moyen important d’explorer l’information contenue dans les jeux de données. Il est plus facile de construire un histogramme et de suspecter une distribution normale plutôt que de calculer des statistiques descriptives et d’avoir les mêmes suspissions.
