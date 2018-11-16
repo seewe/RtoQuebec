@@ -24,11 +24,12 @@ weight: 10
 # DÉFINITION DE GRAPHES
   D'après l'encyclopédie en ligne Wikipédia, La théorie des graphes est la discipline mathématique et informatique qui étudie les graphes.  
   Un graphe est un modèle abstrait de dessins de réseaux reliant des objets. Ce modèle est constitué par la donnée de `points`, appelés nœuds ou sommets (en référence aux polyèdres), et de `liens` entre ces points. ces liens sont souvent symétriques (les graphes sont alors dits non orientés) et sont appelés des arêtes. L'image ci-dessous illutre la définition d'un graphe non orienté.  
-![Exemple de graphe non orienté](../files/graphill.PNG)
+![Exemple de graphe non orienté](F:/codeSources/graphill.PNG)
 
   Ce tutoriel ne revient pas sur la théorie des graphes. Il illustre simplement la construction des graphes non orientés et interactif avec `R`.
-  
-# EXEMPLE PRATIQUE : AFFINITÉ ENTRE ÉTUDIANTS
+
+
+# EXEMPLE PRATIQUE : REPRÉSENTATION DES LIENS ENTRE LES ÉTUDIANTS
 
 Les données de ce papier sont fictives. Il s'agit d'un ensemble de $23$ étudiants d'une salle de classe qui participent aux activités parascolaire chaque fin de semaines. Sur la base de la participation aux activités, le papier représente graphiquement les liens significatifs qui existent entre les étudiants.
 
@@ -45,7 +46,7 @@ head(etudiants,5)
 ## La structure de regroupement des étudiants
   Les figures ci-dessous montrent qu'il existe une structure de cooccurrence entre les étudiants. La théorie de cette méthode est developpée dans le tutoriel des `null models`.
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.width=13}
 # Chargement des codes sources
 source("F:/codeSources/fonctionsProjet.R")
 
@@ -62,6 +63,7 @@ Smpa.etud<-simulMpa(Mpa.etud, method = "quasiswap", simul = 1000)
 Sind.etud<-simulIndicators(Smpa.etud, mccores = 3) 
 
 # Structure de regroupement dans la salle de classe
+
     # --p.valeur du test exact
 p.val.temp.etud<-Exactest(OBS.etud$Obstemp, Sind.etud$temp) ;
 p.val.n0.etud<-Exactest(OBS.etud$Obsn0, Sind.etud$n0)  ;  
@@ -115,13 +117,17 @@ Test.cooc<-OBSdist[OBSdist$p.val.cooc<=0.40,]  ;  head(Test.cooc[,-4],5)
 ## Représentations graphiques
 
 ### Représentation du graphe non interactif
-```{r echo=FALSE}
+```{r fig.width=13}
 
-bdgraph<-Test.cooc[,c("from","to","Sor")]
+# Définir les couleurs du graphe
 color1<-"darkseagreen2" ; color2<-"lightblue1" ; color3<-"black"
+
+# Jeu de données pour représenter le graphe
+bdgraph<-Test.cooc[,c("from","to","Sor")]
 g=graph.data.frame(bdgraph[,-3], directed=FALSE)
 graph_layout=layout.fruchterman.reingold(g)
 
+# Représentation du graphe
 plot.igraph(g, 
      layout=graph_layout, 
      edge.width=(exp(bdgraph$Sor)), 
@@ -134,10 +140,13 @@ plot.igraph(g,
 ```
 
 ### Représentation du graphe interactif
-```{r echo=FALSE}
+```{r fig.width=13}
+
+# Les noeuds du graphe
 vertx<-as.factor(vertex.attributes(g)$name)  ;  nnod<-length(vertx)
 netw3d.from<-as.character(Test.cooc$from)   ;  netw3d.to<-as.character(Test.cooc$to)
 
+# Création du jeu de données de description des noeud
 MyNodes<-data.frame( species=levels(vertx) )  ;  group<-c()
 for (i in 1:nnod) {
   grp<-as.character(etudiants[as.character(etudiants$Etudiants)==as.character(MyNodes[i,]),2])
@@ -145,16 +154,20 @@ for (i in 1:nnod) {
 }
 MyNodes<-data.frame( student=levels(vertx) , group=factor(group) , size=rep(5,nnod))
 
-
+# Jeu de données qui spécifie les liens entre les étudiants
 MyLinks<-data.frame(from=as.double(factor(netw3d.from,levels(vertx)))-1, # On fait -1 pour indexer à 0
                     to=as.double(factor(netw3d.to,levels(vertx)))-1,     # On fait -1 pour indexer à 0
-                    Cooc=Test.cooc$cooc+1, typeLink=as.factor(Test.cooc$sens.cooc ))  # +1 pour eviter des liens nuls
+                    Cooc=Test.cooc$cooc+1,                               # +1 pour eviter des liens nuls
+                    typeLink=as.factor(Test.cooc$sens.cooc ))  
 
+# Vecteur de couleur des liens entre les étudiants
 MyLinks$Linkcolor<-Colinks<-ifelse(MyLinks$typeLink=="Similarite","green","red")
 
-head(MyNodes,3)  ;  head(MyLinks,3)
+# Les jeux de données pour représenter le graphe
+head(MyNodes,3)
+head(MyLinks,3)
 
-
+# Représentation du graphe
 forceNetwork(Links = MyLinks, Nodes = MyNodes, Source = "from", Target = "to", Value = "Cooc",
              NodeID = "student", Group = "group", opacity = 0.9, Nodesize = "size", 
              linkDistance = 90, fontSize = 20, linkColour = Colinks, legend = TRUE)

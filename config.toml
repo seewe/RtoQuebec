@@ -10,4 +10,4 @@ ignoreFiles = ["\\.Rmd$","\\.nb.html$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
 [taxonomies]
     tag = "tags"
-    archive = "archives" 
+    archive = "archives"

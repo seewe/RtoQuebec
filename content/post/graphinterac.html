@@ -8,7 +8,7 @@ menu:
 next: /tutorials/github-pages-blog
 prev: /tutorials/automated-deployments
 title: 'Construire un graphe interactif sous R'
-date: "2018-11-15 21:44:03"
+date: "2018-11-15 22:06:35"
 output:
   html_notebook:
     fig_width: 13
@@ -30,11 +30,11 @@ Dans ce tutoriel, nous voulons représenter les graphes (réseau) pour illustrer
 <h1>DÉFINITION DE GRAPHES</h1>
 <p>D’après l’encyclopédie en ligne Wikipédia, La théorie des graphes est la discipline mathématique et informatique qui étudie les graphes.<br />
 Un graphe est un modèle abstrait de dessins de réseaux reliant des objets. Ce modèle est constitué par la donnée de <code>points</code>, appelés nœuds ou sommets (en référence aux polyèdres), et de <code>liens</code> entre ces points. ces liens sont souvent symétriques (les graphes sont alors dits non orientés) et sont appelés des arêtes. L’image ci-dessous illutre la définition d’un graphe non orienté.<br />
-<img src="../files/graphill.PNG" alt="Exemple de graphe non orienté" /></p>
+<img src="F:/codeSources/graphill.png" alt="Exemple de graphe non orienté" /></p>
 <p>Ce tutoriel ne revient pas sur la théorie des graphes. Il illustre simplement la construction des graphes non orientés et interactif avec <code>R</code>.</p>
 </div>
-<div id="exemple-pratique-affinite-entre-etudiants" class="section level1">
-<h1>EXEMPLE PRATIQUE : AFFINITÉ ENTRE ÉTUDIANTS</h1>
+<div id="exemple-pratique-representation-des-liens-entre-les-etudiants" class="section level1">
+<h1>EXEMPLE PRATIQUE : REPRÉSENTATION DES LIENS ENTRE LES ÉTUDIANTS</h1>
 <p>Les données de ce papier sont fictives. Il s’agit d’un ensemble de <span class="math inline">\(23\)</span> étudiants d’une salle de classe qui participent aux activités parascolaire chaque fin de semaines. Sur la base de la participation aux activités, le papier représente graphiquement les liens significatifs qui existent entre les étudiants.</p>
 <div id="la-matrice-de-presence-absence-mpa-aux-activites-parascolaires" class="section level2">
 <h2>La matrice de présence-absence (Mpa) aux activités parascolaires</h2>
@@ -135,9 +135,9 @@ Un graphe est un modèle abstrait de dessins de réseaux reliant des objets. Ce 
 ## 3 Bertholo   LeMaham 0.5714286 0.4000000    2
 ## 4 Bertholo     Serge 0.5000000 0.3333333    2
 ## 5 Bertholo     Reine 0.7500000 0.6000000    3</code></pre>
-<pre><code>##         temp    N0  NODF Cscore
-## p.value 0.96 0.924 0.852  0.028</code></pre>
-<p><img src="/post/graphinterac_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre><code>##          temp    N0  NODF Cscore
+## p.value 0.998 0.944 0.784  0.046</code></pre>
+<p><img src="/post/graphinterac_files/figure-html/unnamed-chunk-2-1.png" width="1248" /></p>
 </div>
 <div id="la-matrice-de-lien-significatif-entre-les-etudiants" class="section level2">
 <h2>La matrice de lien significatif entre les étudiants</h2>
@@ -147,29 +147,75 @@ Un graphe est un modèle abstrait de dessins de réseaux reliant des objets. Ce 
 ## 1          253         253
 ## 2         1000        1000</code></pre>
 <pre><code>##        from       to       Sor cooc p.val.cooc meanSimCooc     sens.cooc
-## 1  Bertholo    Vanou 1.0000000    4      0.056       2.288    Similarite
-## 9  Bertholo Sorelite 0.0000000    0      0.044       1.728 Dissimilarite
-## 11 Bertholo LaHossou 0.8888889    4      0.314       2.888    Similarite
-## 18 Bertholo     Roma 0.2500000    1      0.242       2.335 Dissimilarite
-## 30    Vanou Sorelite 0.0000000    0      0.054       1.749 Dissimilarite</code></pre>
+## 1  Bertholo    Vanou 1.0000000    4      0.056       2.297    Similarite
+## 9  Bertholo Sorelite 0.0000000    0      0.058       1.726 Dissimilarite
+## 11 Bertholo LaHossou 0.8888889    4      0.334       2.887    Similarite
+## 18 Bertholo     Roma 0.2500000    1      0.212       2.321 Dissimilarite
+## 30    Vanou Sorelite 0.0000000    0      0.064       1.741 Dissimilarite</code></pre>
 </div>
 <div id="representations-graphiques" class="section level2">
 <h2>Représentations graphiques</h2>
 <div id="representation-du-graphe-non-interactif" class="section level3">
 <h3>Représentation du graphe non interactif</h3>
-<p><img src="/post/graphinterac_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code># Définir les couleurs du graphe
+color1&lt;-&quot;darkseagreen2&quot; ; color2&lt;-&quot;lightblue1&quot; ; color3&lt;-&quot;black&quot;
+
+# Jeu de données pour représenter le graphe
+bdgraph&lt;-Test.cooc[,c(&quot;from&quot;,&quot;to&quot;,&quot;Sor&quot;)]
+g=graph.data.frame(bdgraph[,-3], directed=FALSE)
+graph_layout=layout.fruchterman.reingold(g)
+
+# Représentation du graphe
+plot.igraph(g, 
+     layout=graph_layout, 
+     edge.width=(exp(bdgraph$Sor)), 
+     vertex.label.cex=0.7,
+     vertex.color=color1,
+     vertex.frame.color=color2,
+     vertex.size=18,
+     edge.color=color3
+)</code></pre>
+<p><img src="/post/graphinterac_files/figure-html/unnamed-chunk-4-1.png" width="1248" /></p>
 </div>
 <div id="representation-du-graphe-interactif" class="section level3">
 <h3>Représentation du graphe interactif</h3>
+<pre class="r"><code># Les noeuds du graphe
+vertx&lt;-as.factor(vertex.attributes(g)$name)  ;  nnod&lt;-length(vertx)
+netw3d.from&lt;-as.character(Test.cooc$from)   ;  netw3d.to&lt;-as.character(Test.cooc$to)
+
+# Création du jeu de données de description des noeud
+MyNodes&lt;-data.frame( species=levels(vertx) )  ;  group&lt;-c()
+for (i in 1:nnod) {
+  grp&lt;-as.character(etudiants[as.character(etudiants$Etudiants)==as.character(MyNodes[i,]),2])
+  group&lt;-c(group,grp)
+}
+MyNodes&lt;-data.frame( student=levels(vertx) , group=factor(group) , size=rep(5,nnod))
+
+# Jeu de données qui spécifie les liens entre les étudiants
+MyLinks&lt;-data.frame(from=as.double(factor(netw3d.from,levels(vertx)))-1, # On fait -1 pour indexer à 0
+                    to=as.double(factor(netw3d.to,levels(vertx)))-1,     # On fait -1 pour indexer à 0
+                    Cooc=Test.cooc$cooc+1,                               # +1 pour eviter des liens nuls
+                    typeLink=as.factor(Test.cooc$sens.cooc ))  
+
+# Vecteur de couleur des liens entre les étudiants
+MyLinks$Linkcolor&lt;-Colinks&lt;-ifelse(MyLinks$typeLink==&quot;Similarite&quot;,&quot;green&quot;,&quot;red&quot;)
+
+# Les jeux de données pour représenter le graphe
+head(MyNodes,3)</code></pre>
 <pre><code>##   student group size
 ## 1    Abib  grp1    5
 ## 2   Afann  grp4    5
 ## 3   Astro  grp4    5</code></pre>
+<pre class="r"><code>head(MyLinks,3)</code></pre>
 <pre><code>##   from to Cooc      typeLink Linkcolor
 ## 1    3 19    5    Similarite     green
 ## 2    3 16    1 Dissimilarite       red
 ## 3    3  8    5    Similarite     green</code></pre>
-<div id="htmlwidget-1" style="width:672px;height:480px;" class="forceNetwork html-widget"></div>
+<pre class="r"><code># Représentation du graphe
+forceNetwork(Links = MyLinks, Nodes = MyNodes, Source = &quot;from&quot;, Target = &quot;to&quot;, Value = &quot;Cooc&quot;,
+             NodeID = &quot;student&quot;, Group = &quot;group&quot;, opacity = 0.9, Nodesize = &quot;size&quot;, 
+             linkDistance = 90, fontSize = 20, linkColour = Colinks, legend = TRUE)</code></pre>
+<div id="htmlwidget-1" style="width:1248px;height:480px;" class="forceNetwork html-widget"></div>
 <script type="application/json" data-for="htmlwidget-1">{"x":{"links":{"source":[3,3,3,3,19,19,19,10,10,10,10,15,15,13,13,13,13,13,12,12,12,12,12,12,2,11,11,11,16,16,17,17,17,17,6,6,7,4,4,4,0,0,5,14],"target":[19,16,8,14,16,8,14,7,0,1,9,11,6,12,4,5,14,18,11,17,6,4,5,18,8,5,14,18,8,14,7,5,1,18,5,18,1,5,14,18,14,9,18,9],"value":[5,1,5,2,1,5,2,4,3,1,3,5,4,4,1,2,2,2,2,1,1,1,1,1,5,5,5,5,2,4,4,4,1,4,4,4,1,4,4,4,1,3,5,1],"colour":["green","red","green","red","red","green","red","green","green","red","green","green","green","green","red","red","red","red","red","red","red","red","red","red","green","green","green","green","red","green","green","green","red","green","green","green","red","green","green","green","red","green","green","red"]},"nodes":{"name":["Abib","Afann","Astro","Bertholo","Borio","Cedrico","Florent","HighTech","LaHossou","LeCherif","LeMaham","Maxi","Nelly","Reine","Roma","Serge","Sorelite","ThePig","TheTouks","Vanou"],"group":["grp1","grp4","grp4","grp4","grp2","grp2","grp4","grp1","grp1","grp2","grp2","grp4","grp4","grp4","grp1","grp2","grp1","grp1","grp2","grp4"],"nodesize":[5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5]},"options":{"NodeID":"student","Group":"group","colourScale":"d3.scaleOrdinal(d3.schemeCategory20);","fontSize":20,"fontFamily":"serif","clickTextSize":50,"linkDistance":90,"linkWidth":"function(d) { return Math.sqrt(d.value); }","charge":-30,"opacity":0.9,"zoom":false,"legend":true,"arrows":false,"nodesize":true,"radiusCalculation":" Math.sqrt(d.nodesize)+6","bounded":false,"opacityNoHover":0,"clickAction":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
