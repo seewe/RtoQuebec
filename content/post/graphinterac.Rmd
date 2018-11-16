@@ -1,0 +1,150 @@
+---
+author: "Sergio Ewane Ebouele"
+archives: "2018"
+linktitle: GRAPHES INTERACTIFS AVEC R
+menu:
+  main:
+    parent: tutorials
+next: /tutorials/github-pages-blog
+prev: /tutorials/automated-deployments
+title: 'Construire un graphe interactif sous R'
+date: "`r Sys.time()`"
+output:
+  html_notebook:
+    fig_width: 13
+    toc: yes
+weight: 10
+---
+
+# INTRODUCTION
+
+  La représentation graphique des données reste un moyen important d'explorer l'information contenue dans les jeux de données. Il est plus facile de construire un histogramme et de suspecter une distribution normale plutôt que de calculer des statistiques descriptives et d'avoir les mêmes suspissions.  
+  Dans ce tutoriel, nous voulons représenter les graphes (réseau) pour illustrer les liens qui peuvent exister entre des entités d'une communauté.
+  
+# DÉFINITION DE GRAPHES
+  D'après l'encyclopédie en ligne Wikipédia, La théorie des graphes est la discipline mathématique et informatique qui étudie les graphes.  
+  Un graphe est un modèle abstrait de dessins de réseaux reliant des objets. Ce modèle est constitué par la donnée de `points`, appelés nœuds ou sommets (en référence aux polyèdres), et de `liens` entre ces points. ces liens sont souvent symétriques (les graphes sont alors dits non orientés) et sont appelés des arêtes. L'image ci-dessous illutre la définition d'un graphe non orienté.  
+![Exemple de graphe non orienté](../files/graphill.PNG)
+
+  Ce tutoriel ne revient pas sur la théorie des graphes. Il illustre simplement la construction des graphes non orientés et interactif avec `R`.
+  
+# EXEMPLE PRATIQUE : AFFINITÉ ENTRE ÉTUDIANTS
+
+Les données de ce papier sont fictives. Il s'agit d'un ensemble de $23$ étudiants d'une salle de classe qui participent aux activités parascolaire chaque fin de semaines. Sur la base de la participation aux activités, le papier représente graphiquement les liens significatifs qui existent entre les étudiants.
+
+## La matrice de présence-absence (Mpa) aux activités parascolaires
+
+
+
+```{r echo=FALSE}
+etudiants<-read.table("F:/codeSources/etudiants.txt",header = TRUE, sep = "\t")
+Mpa.etud<-as.matrix(etudiants[,-1])  ;   row.names(Mpa.etud)<-etudiants[,1]
+etudiants
+```
+
+## La matrice de lien significatif entre les étudiants
+
+Le lien entre deux étudiants est mesuré par la distance de Sorensen. En fait, cette diatance mesure la similarité entre deux entités de la Mpa. Un lien est significatif lorsqu'il n'émane pas du hasard. La comparaison entre le hasard et la significativité d'un lien fera l'objet d'un autre tutoriel. Pour l'instant, le tutoriel présente la matrice de lien entre les étudiant et la représente grapgiquement.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Chargement des codes sources
+source("F:/codeSources/fonctionsProjet.R")
+
+# Indicateurs de regroupement observés
+OBS.etud<-ObserIndicators(Mpa.etud)
+
+# Calcul de la matrice de distance observée
+OBSdist<-distance(Mpa.etud)  ; head(OBSdist,10)
+
+# Simulation des Mpa par la méthode du quasiswap
+Smpa.etud<-simulMpa(Mpa.etud, method = "quasiswap", simul = 1000)
+
+# Indicateurs de regroupement simulés
+Sind.etud<-simulIndicators(Smpa.etud, mccores = 3) 
+
+# Structure de regroupement dans la salle de classe
+    # --p.valeur du test exact
+p.val.temp.etud<-Exactest(OBS.etud$Obstemp, Sind.etud$temp) ;
+p.val.n0.etud<-Exactest(OBS.etud$Obsn0, Sind.etud$n0)  ;  
+p.val.nodf.etud<-Exactest(OBS.etud$Obsnodf, Sind.etud$nodf) 
+p.val.Cscore.etud<-Exactest(OBS.etud$ObsCscore, Sind.etud$Cscore)
+res.pval.etud<-data.frame(temp=p.val.temp.etud, N0=p.val.n0.etud, NODF=p.val.nodf.etud, Cscore=p.val.Cscore.etud)
+rownames(res.pval.etud)<-"p.value"; res.pval.etud
+
+    # --histogramme
+matt<-matrix(1:4, ncol = 2, byrow = TRUE)  ;  layout(matt)
+hist(Sind.etud$temp, main = "Temp", freq = FALSE, xlab = "Temperature")  ;  abline(v=OBS.etud$Obstemp, col="red")
+hist(Sind.etud$n0, main = "N0", freq = FALSE, xlab = "N0")  ;  abline(v=OBS.etud$Obsn0, col="red")
+hist(Sind.etud$nodf, main = "NODF", freq = FALSE, xlab = "NODF")  ;  abline(v=OBS.etud$Obsnodf, col="red")
+hist(Sind.etud$Cscore, main = "Cscore", freq = FALSE, xlab = "Cscore")  ;  abline(v=OBS.etud$ObsCscore, col="red")
+
+# Calcul des distances sur les Mpa simulées
+nobs<-dim(OBSdist)[1] ; simul<-dim(Smpa.etud)[3]  
+SIMcooc<-matrix(0,nobs,simul) ;  SIMsor<-matrix(0,nobs,simul)  # matrice des indicateurs de cooc et Sor simulés
+pb <- winProgressBar(title = "progress bar", min = 0, max = simul, width = 300)
+for (i in 1:simul){
+  simcooc<-distance(Smpa.etud[,,i])  ;  SIMcooc[,i]<-simcooc$cooc  ;  SIMsor[,i]<-simcooc$Sor
+setWinProgressBar(pb, i, title=paste( round(i/simul*100, 0),"% of iterations done (",i,")"))
+}  
+close(pb)  ;  header(cbind.data.frame( dim(SIMcooc)  ,  dim(SIMsor) ),5)
+
+# Les cooccurrences significatives
+combi<-dim(OBSdist)[1]
+for (i in 1:combi){   
+  OBSdist$p.val.cooc[i]<-Exactest(OBSdist$cooc[i],SIMcooc[i,])
+  OBSdist$p.val.sor[i]<-Exactest(OBSdist$Sor[i],SIMsor[i,])
+}
+Test.cooc<-OBSdist[OBSdist$p.val.cooc<=0.05,]  ;  Test.cooc
+Test.sor<-OBSdist[OBSdist$p.val.sor<=0.05,]  #;  Test.sor
+
+
+
+```
+
+
+
+## Représentations graphiques
+
+### Représentation non interactine
+```{r echo=FALSE}
+
+bdgraph<-Test.cooc[,c("from","to","Sor")]
+color1<-"darkseagreen2" ; color2<-"lightblue1" ; color3<-"black"
+g=graph.data.frame(bdgraph[,-3], directed=FALSE)
+graph_layout=layout.fruchterman.reingold(g)
+
+plot.igraph(g, 
+     layout=graph_layout, 
+     edge.width=(exp(bdgraph$Sor)), 
+     vertex.label.cex=0.7,
+     vertex.color=color1,
+     vertex.frame.color=color2,
+     vertex.size=18,
+     edge.color=color3
+)
+```
+
+### Représentation interactive
+```{r echo=FALSE}
+vertx<-as.factor(vertex.attributes(g)$name)  ;  lengthh<-length(vertx)
+netw3d.from<-as.character(Test.cooc$from)   ;  netw3d.to<-as.character(Test.cooc$to)
+
+MyNodes<-data.frame( species=levels(vertx) , group=factor(substr(vertx,1,4)) , size=rep(5,lengthh))
+
+MyLinks<-data.frame(from=as.double(factor(netw3d.from,levels(vertx)))-1, # On fait -1 pour indexer à 0
+                    to=as.double(factor(netw3d.to,levels(vertx)))-1,     # On fait -1 pour indexer à 0
+                    Sor=exp(Test.cooc$Sor) )  # exp() pour ne pas avoir des liens nuls
+
+forceNetwork(Links = MyLinks, Nodes = MyNodes, Source = "from", Target = "to", Value = "Sor",
+             NodeID = "species", Group = "group", opacity = 0.9, Nodesize = "size", 
+             linkDistance = 90, fontSize = 20, linkColour = "gray", legend = TRUE)
+```
+
+
+
+
+
+
+
+

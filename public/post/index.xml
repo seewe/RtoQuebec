@@ -6,10 +6,21 @@
     <description>Recent content in Posts on BLOGDOWNàQUÉBEC</description>
     <generator>Hugo -- gohugo.io</generator>
     <copyright>Copyright © 2008–2018, @JeffProd</copyright>
-    <lastBuildDate>Wed, 14 Nov 2018 15:35:17 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 15 Nov 2018 13:26:43 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Construire un graphe interactif sous R</title>
+      <link>/post/graphinterac/</link>
+      <pubDate>Thu, 15 Nov 2018 13:26:43 +0000</pubDate>
+      
+      <guid>/post/graphinterac/</guid>
+      <description>INTRODUCTIONLa représentation graphique des données reste un moyen important d’explorer l’information contenue dans les jeux de données. Il est plus facile de construire un histogramme et de suspecter une distribution normale plutôt que de calculer des statistiques descriptives et d’avoir les mêmes suspissions.
+Dans ce tutoriel, nous voulons représenter les graphes (réseau) pour illustrer les liens qui peuvent exister entre des entités d’une communauté.
+DÉFINITION DE GRAPHESD’après l’encyclopédie en ligne Wikipédia, La théorie des graphes est la discipline mathématique et informatique qui étudie les graphes.</description>
+    </item>
     
     <item>
       <title>MODÉLISATION DES DONNÉES DU TOMPA TREE</title>

@@ -1,0 +1,373 @@
+---
+author: "Sergio Ewane Ebouele"
+archives: "2018"
+linktitle: GRAPHES INTERACTIFS AVEC R
+menu:
+  main:
+    parent: tutorials
+next: /tutorials/github-pages-blog
+prev: /tutorials/automated-deployments
+title: 'Construire un graphe interactif sous R'
+date: "2018-11-15 13:26:43"
+output:
+  html_notebook:
+    fig_width: 13
+    toc: yes
+weight: 10
+---
+
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/d3/d3.min.js"></script>
+<script src="/rmarkdown-libs/forceNetwork-binding/forceNetwork.js"></script>
+
+
+<div id="introduction" class="section level1">
+<h1>INTRODUCTION</h1>
+<p>La représentation graphique des données reste un moyen important d’explorer l’information contenue dans les jeux de données. Il est plus facile de construire un histogramme et de suspecter une distribution normale plutôt que de calculer des statistiques descriptives et d’avoir les mêmes suspissions.<br />
+Dans ce tutoriel, nous voulons représenter les graphes (réseau) pour illustrer les liens qui peuvent exister entre des entités d’une communauté.</p>
+</div>
+<div id="definition-de-graphes" class="section level1">
+<h1>DÉFINITION DE GRAPHES</h1>
+<p>D’après l’encyclopédie en ligne Wikipédia, La théorie des graphes est la discipline mathématique et informatique qui étudie les graphes.<br />
+Un graphe est un modèle abstrait de dessins de réseaux reliant des objets. Ce modèle est constitué par la donnée de <code>points</code>, appelés nœuds ou sommets (en référence aux polyèdres), et de <code>liens</code> entre ces points. ces liens sont souvent symétriques (les graphes sont alors dits non orientés) et sont appelés des arêtes. L’image ci-dessous illutre la définition d’un graphe non orienté.<br />
+<img src="../files/graphill.PNG" alt="Exemple de graphe non orienté" /></p>
+<p>Ce tutoriel ne revient pas sur la théorie des graphes. Il illustre simplement la construction des graphes non orientés et interactif avec <code>R</code>.</p>
+</div>
+<div id="exemple-pratique-affinite-entre-etudiants" class="section level1">
+<h1>EXEMPLE PRATIQUE : AFFINITÉ ENTRE ÉTUDIANTS</h1>
+<p>Les données de ce papier sont fictives. Il s’agit d’un ensemble de <span class="math inline">\(23\)</span> étudiants d’une salle de classe qui participent aux activités parascolaire chaque fin de semaines. Sur la base de la participation aux activités, le papier représente graphiquement les liens significatifs qui existent entre les étudiants.</p>
+<div id="la-matrice-de-presence-absence-mpa-aux-activites-parascolaires" class="section level2">
+<h2>La matrice de présence-absence (Mpa) aux activités parascolaires</h2>
+<pre><code>##    Etudiants Cinema Soccer Bibliotheque Clubdancing Religion LaFerme
+## 1   Bertholo      1      0            1           0        1       0
+## 2      Vanou      1      0            0           1        1       0
+## 3  Carmelito      0      1            1           1        0       0
+## 4    LeMaham      0      1            0           0        1       0
+## 5      Serge      1      1            0           0        0       1
+## 6      Reine      0      0            1           0        1       1
+## 7      Nelly      0      1            1           0        1       1
+## 8      Astro      1      0            0           1        0       0
+## 9       Maxi      1      1            0           1        0       1
+## 10  Sorelite      0      1            0           1        0       1
+## 11 TheWensdy      0      1            0           1        0       0
+## 12  LaHossou      1      0            1           1        1       0
+## 13   Florent      1      1            0           0        0       0
+## 14  HighTech      0      1            0           1        1       0
+## 15     Borio      1      1            0           1        1       0
+## 16  LeDidier      1      0            0           0        0       1
+## 17      Abib      1      0            0           0        1       0
+## 18   Cédrico      1      1            0           1        0       0
+## 19      Roma      1      1            0           1        0       1
+## 20     Afann      1      0            1           0        0       1
+## 21  LeCherif      1      0            0           0        1       0
+## 22     LeCyp      1      1            0           1        1       0
+## 23  TheTouks      1      1            0           0        0       0
+##    Restaurant
+## 1           1
+## 2           1
+## 3           1
+## 4           1
+## 5           0
+## 6           0
+## 7           0
+## 8           1
+## 9           0
+## 10          0
+## 11          1
+## 12          1
+## 13          1
+## 14          1
+## 15          0
+## 16          1
+## 17          1
+## 18          1
+## 19          0
+## 20          0
+## 21          1
+## 22          0
+## 23          1</code></pre>
+</div>
+<div id="la-matrice-de-lien-significatif-entre-les-etudiants" class="section level2">
+<h2>La matrice de lien significatif entre les étudiants</h2>
+<p>Le lien entre deux étudiants est mesuré par la distance de Sorensen. En fait, cette diatance mesure la similarité entre deux entités de la Mpa. Un lien est significatif lorsqu’il n’émane pas du hasard. La comparaison entre le hasard et la significativité d’un lien fera l’objet d’un autre tutoriel. Pour l’instant, le tutoriel présente la matrice de lien entre les étudiant et la représente grapgiquement.</p>
+<pre><code>##          from        to       Sor       Jac cooc
+## 1    Bertholo     Vanou 0.7500000 0.6000000    3
+## 2    Bertholo Carmelito 0.5000000 0.3333333    2
+## 3    Bertholo   LeMaham 0.5714286 0.4000000    2
+## 4    Bertholo     Serge 0.2857143 0.1666667    1
+## 5    Bertholo     Reine 0.5714286 0.4000000    2
+## 6    Bertholo     Nelly 0.5000000 0.3333333    2
+## 7    Bertholo     Astro 0.5714286 0.4000000    2
+## 8    Bertholo      Maxi 0.2500000 0.1428571    1
+## 9    Bertholo  Sorelite 0.0000000 0.0000000    0
+## 10   Bertholo TheWensdy 0.2857143 0.1666667    1
+## 11   Bertholo  LaHossou 0.8888889 0.8000000    4
+## 12   Bertholo   Florent 0.5714286 0.4000000    2
+## 13   Bertholo  HighTech 0.5000000 0.3333333    2
+## 14   Bertholo     Borio 0.5000000 0.3333333    2
+## 15   Bertholo  LeDidier 0.5714286 0.4000000    2
+## 16   Bertholo      Abib 0.8571429 0.7500000    3
+## 17   Bertholo   Cédrico 0.5000000 0.3333333    2
+## 18   Bertholo      Roma 0.2500000 0.1428571    1
+## 19   Bertholo     Afann 0.5714286 0.4000000    2
+## 20   Bertholo  LeCherif 0.8571429 0.7500000    3
+## 21   Bertholo     LeCyp 0.5000000 0.3333333    2
+## 22   Bertholo  TheTouks 0.5714286 0.4000000    2
+## 23      Vanou Carmelito 0.5000000 0.3333333    2
+## 24      Vanou   LeMaham 0.5714286 0.4000000    2
+## 25      Vanou     Serge 0.2857143 0.1666667    1
+## 26      Vanou     Reine 0.2857143 0.1666667    1
+## 27      Vanou     Nelly 0.2500000 0.1428571    1
+## 28      Vanou     Astro 0.8571429 0.7500000    3
+## 29      Vanou      Maxi 0.5000000 0.3333333    2
+## 30      Vanou  Sorelite 0.2857143 0.1666667    1
+## 31      Vanou TheWensdy 0.5714286 0.4000000    2
+## 32      Vanou  LaHossou 0.8888889 0.8000000    4
+## 33      Vanou   Florent 0.5714286 0.4000000    2
+## 34      Vanou  HighTech 0.7500000 0.6000000    3
+## 35      Vanou     Borio 0.7500000 0.6000000    3
+## 36      Vanou  LeDidier 0.5714286 0.4000000    2
+## 37      Vanou      Abib 0.8571429 0.7500000    3
+## 38      Vanou   Cédrico 0.7500000 0.6000000    3
+## 39      Vanou      Roma 0.5000000 0.3333333    2
+## 40      Vanou     Afann 0.2857143 0.1666667    1
+## 41      Vanou  LeCherif 0.8571429 0.7500000    3
+## 42      Vanou     LeCyp 0.7500000 0.6000000    3
+## 43      Vanou  TheTouks 0.5714286 0.4000000    2
+## 44  Carmelito   LeMaham 0.5714286 0.4000000    2
+## 45  Carmelito     Serge 0.2857143 0.1666667    1
+## 46  Carmelito     Reine 0.2857143 0.1666667    1
+## 47  Carmelito     Nelly 0.5000000 0.3333333    2
+## 48  Carmelito     Astro 0.5714286 0.4000000    2
+## 49  Carmelito      Maxi 0.5000000 0.3333333    2
+## 50  Carmelito  Sorelite 0.5714286 0.4000000    2
+## 51  Carmelito TheWensdy 0.8571429 0.7500000    3
+## 52  Carmelito  LaHossou 0.6666667 0.5000000    3
+## 53  Carmelito   Florent 0.5714286 0.4000000    2
+## 54  Carmelito  HighTech 0.7500000 0.6000000    3
+## 55  Carmelito     Borio 0.5000000 0.3333333    2
+## 56  Carmelito  LeDidier 0.2857143 0.1666667    1
+## 57  Carmelito      Abib 0.2857143 0.1666667    1
+## 58  Carmelito   Cédrico 0.7500000 0.6000000    3
+## 59  Carmelito      Roma 0.5000000 0.3333333    2
+## 60  Carmelito     Afann 0.2857143 0.1666667    1
+## 61  Carmelito  LeCherif 0.2857143 0.1666667    1
+## 62  Carmelito     LeCyp 0.5000000 0.3333333    2
+## 63  Carmelito  TheTouks 0.5714286 0.4000000    2
+## 64    LeMaham     Serge 0.3333333 0.2000000    1
+## 65    LeMaham     Reine 0.3333333 0.2000000    1
+## 66    LeMaham     Nelly 0.5714286 0.4000000    2
+## 67    LeMaham     Astro 0.3333333 0.2000000    1
+## 68    LeMaham      Maxi 0.2857143 0.1666667    1
+## 69    LeMaham  Sorelite 0.3333333 0.2000000    1
+## 70    LeMaham TheWensdy 0.6666667 0.5000000    2
+## 71    LeMaham  LaHossou 0.5000000 0.3333333    2
+## 72    LeMaham   Florent 0.6666667 0.5000000    2
+## 73    LeMaham  HighTech 0.8571429 0.7500000    3
+## 74    LeMaham     Borio 0.5714286 0.4000000    2
+## 75    LeMaham  LeDidier 0.3333333 0.2000000    1
+## 76    LeMaham      Abib 0.6666667 0.5000000    2
+## 77    LeMaham   Cédrico 0.5714286 0.4000000    2
+## 78    LeMaham      Roma 0.2857143 0.1666667    1
+## 79    LeMaham     Afann 0.0000000 0.0000000    0
+## 80    LeMaham  LeCherif 0.6666667 0.5000000    2
+## 81    LeMaham     LeCyp 0.5714286 0.4000000    2
+## 82    LeMaham  TheTouks 0.6666667 0.5000000    2
+## 83      Serge     Reine 0.3333333 0.2000000    1
+## 84      Serge     Nelly 0.5714286 0.4000000    2
+## 85      Serge     Astro 0.3333333 0.2000000    1
+## 86      Serge      Maxi 0.8571429 0.7500000    3
+## 87      Serge  Sorelite 0.6666667 0.5000000    2
+## 88      Serge TheWensdy 0.3333333 0.2000000    1
+## 89      Serge  LaHossou 0.2500000 0.1428571    1
+## 90      Serge   Florent 0.6666667 0.5000000    2
+## 91      Serge  HighTech 0.2857143 0.1666667    1
+## 92      Serge     Borio 0.5714286 0.4000000    2
+## 93      Serge  LeDidier 0.6666667 0.5000000    2
+## 94      Serge      Abib 0.3333333 0.2000000    1
+## 95      Serge   Cédrico 0.5714286 0.4000000    2
+## 96      Serge      Roma 0.8571429 0.7500000    3
+## 97      Serge     Afann 0.6666667 0.5000000    2
+## 98      Serge  LeCherif 0.3333333 0.2000000    1
+## 99      Serge     LeCyp 0.5714286 0.4000000    2
+## 100     Serge  TheTouks 0.6666667 0.5000000    2
+## 101     Reine     Nelly 0.8571429 0.7500000    3
+## 102     Reine     Astro 0.0000000 0.0000000    0
+## 103     Reine      Maxi 0.2857143 0.1666667    1
+## 104     Reine  Sorelite 0.3333333 0.2000000    1
+## 105     Reine TheWensdy 0.0000000 0.0000000    0
+## 106     Reine  LaHossou 0.5000000 0.3333333    2
+## 107     Reine   Florent 0.0000000 0.0000000    0
+## 108     Reine  HighTech 0.2857143 0.1666667    1
+## 109     Reine     Borio 0.2857143 0.1666667    1
+## 110     Reine  LeDidier 0.3333333 0.2000000    1
+## 111     Reine      Abib 0.3333333 0.2000000    1
+## 112     Reine   Cédrico 0.0000000 0.0000000    0
+## 113     Reine      Roma 0.2857143 0.1666667    1
+## 114     Reine     Afann 0.6666667 0.5000000    2
+## 115     Reine  LeCherif 0.3333333 0.2000000    1
+## 116     Reine     LeCyp 0.2857143 0.1666667    1
+## 117     Reine  TheTouks 0.0000000 0.0000000    0
+## 118     Nelly     Astro 0.0000000 0.0000000    0
+## 119     Nelly      Maxi 0.5000000 0.3333333    2
+## 120     Nelly  Sorelite 0.5714286 0.4000000    2
+## 121     Nelly TheWensdy 0.2857143 0.1666667    1
+## 122     Nelly  LaHossou 0.4444444 0.2857143    2
+## 123     Nelly   Florent 0.2857143 0.1666667    1
+## 124     Nelly  HighTech 0.5000000 0.3333333    2
+## 125     Nelly     Borio 0.5000000 0.3333333    2
+## 126     Nelly  LeDidier 0.2857143 0.1666667    1
+## 127     Nelly      Abib 0.2857143 0.1666667    1
+## 128     Nelly   Cédrico 0.2500000 0.1428571    1
+## 129     Nelly      Roma 0.5000000 0.3333333    2
+## 130     Nelly     Afann 0.5714286 0.4000000    2
+## 131     Nelly  LeCherif 0.2857143 0.1666667    1
+## 132     Nelly     LeCyp 0.5000000 0.3333333    2
+## 133     Nelly  TheTouks 0.2857143 0.1666667    1
+## 134     Astro      Maxi 0.5714286 0.4000000    2
+## 135     Astro  Sorelite 0.3333333 0.2000000    1
+## 136     Astro TheWensdy 0.6666667 0.5000000    2
+## 137     Astro  LaHossou 0.7500000 0.6000000    3
+## 138     Astro   Florent 0.6666667 0.5000000    2
+## 139     Astro  HighTech 0.5714286 0.4000000    2
+## 140     Astro     Borio 0.5714286 0.4000000    2
+## 141     Astro  LeDidier 0.6666667 0.5000000    2
+## 142     Astro      Abib 0.6666667 0.5000000    2
+## 143     Astro   Cédrico 0.8571429 0.7500000    3
+## 144     Astro      Roma 0.5714286 0.4000000    2
+## 145     Astro     Afann 0.3333333 0.2000000    1
+## 146     Astro  LeCherif 0.6666667 0.5000000    2
+## 147     Astro     LeCyp 0.5714286 0.4000000    2
+## 148     Astro  TheTouks 0.6666667 0.5000000    2
+## 149      Maxi  Sorelite 0.8571429 0.7500000    3
+## 150      Maxi TheWensdy 0.5714286 0.4000000    2
+## 151      Maxi  LaHossou 0.4444444 0.2857143    2
+## 152      Maxi   Florent 0.5714286 0.4000000    2
+## 153      Maxi  HighTech 0.5000000 0.3333333    2
+## 154      Maxi     Borio 0.7500000 0.6000000    3
+## 155      Maxi  LeDidier 0.5714286 0.4000000    2
+## 156      Maxi      Abib 0.2857143 0.1666667    1
+## 157      Maxi   Cédrico 0.7500000 0.6000000    3
+## 158      Maxi      Roma 1.0000000 1.0000000    4
+## 159      Maxi     Afann 0.5714286 0.4000000    2
+## 160      Maxi  LeCherif 0.2857143 0.1666667    1
+## 161      Maxi     LeCyp 0.7500000 0.6000000    3
+## 162      Maxi  TheTouks 0.5714286 0.4000000    2
+## 163  Sorelite TheWensdy 0.6666667 0.5000000    2
+## 164  Sorelite  LaHossou 0.2500000 0.1428571    1
+## 165  Sorelite   Florent 0.3333333 0.2000000    1
+## 166  Sorelite  HighTech 0.5714286 0.4000000    2
+## 167  Sorelite     Borio 0.5714286 0.4000000    2
+## 168  Sorelite  LeDidier 0.3333333 0.2000000    1
+## 169  Sorelite      Abib 0.0000000 0.0000000    0
+## 170  Sorelite   Cédrico 0.5714286 0.4000000    2
+## 171  Sorelite      Roma 0.8571429 0.7500000    3
+## 172  Sorelite     Afann 0.3333333 0.2000000    1
+## 173  Sorelite  LeCherif 0.0000000 0.0000000    0
+## 174  Sorelite     LeCyp 0.5714286 0.4000000    2
+## 175  Sorelite  TheTouks 0.3333333 0.2000000    1
+## 176 TheWensdy  LaHossou 0.5000000 0.3333333    2
+## 177 TheWensdy   Florent 0.6666667 0.5000000    2
+## 178 TheWensdy  HighTech 0.8571429 0.7500000    3
+## 179 TheWensdy     Borio 0.5714286 0.4000000    2
+## 180 TheWensdy  LeDidier 0.3333333 0.2000000    1
+## 181 TheWensdy      Abib 0.3333333 0.2000000    1
+## 182 TheWensdy   Cédrico 0.8571429 0.7500000    3
+## 183 TheWensdy      Roma 0.5714286 0.4000000    2
+## 184 TheWensdy     Afann 0.0000000 0.0000000    0
+## 185 TheWensdy  LeCherif 0.3333333 0.2000000    1
+## 186 TheWensdy     LeCyp 0.5714286 0.4000000    2
+## 187 TheWensdy  TheTouks 0.6666667 0.5000000    2
+## 188  LaHossou   Florent 0.5000000 0.3333333    2
+## 189  LaHossou  HighTech 0.6666667 0.5000000    3
+## 190  LaHossou     Borio 0.6666667 0.5000000    3
+## 191  LaHossou  LeDidier 0.5000000 0.3333333    2
+## 192  LaHossou      Abib 0.7500000 0.6000000    3
+## 193  LaHossou   Cédrico 0.6666667 0.5000000    3
+## 194  LaHossou      Roma 0.4444444 0.2857143    2
+## 195  LaHossou     Afann 0.5000000 0.3333333    2
+## 196  LaHossou  LeCherif 0.7500000 0.6000000    3
+## 197  LaHossou     LeCyp 0.6666667 0.5000000    3
+## 198  LaHossou  TheTouks 0.5000000 0.3333333    2
+## 199   Florent  HighTech 0.5714286 0.4000000    2
+## 200   Florent     Borio 0.5714286 0.4000000    2
+## 201   Florent  LeDidier 0.6666667 0.5000000    2
+## 202   Florent      Abib 0.6666667 0.5000000    2
+## 203   Florent   Cédrico 0.8571429 0.7500000    3
+## 204   Florent      Roma 0.5714286 0.4000000    2
+## 205   Florent     Afann 0.3333333 0.2000000    1
+## 206   Florent  LeCherif 0.6666667 0.5000000    2
+## 207   Florent     LeCyp 0.5714286 0.4000000    2
+## 208   Florent  TheTouks 1.0000000 1.0000000    3
+## 209  HighTech     Borio 0.7500000 0.6000000    3
+## 210  HighTech  LeDidier 0.2857143 0.1666667    1
+## 211  HighTech      Abib 0.5714286 0.4000000    2
+## 212  HighTech   Cédrico 0.7500000 0.6000000    3
+## 213  HighTech      Roma 0.5000000 0.3333333    2
+## 214  HighTech     Afann 0.0000000 0.0000000    0
+## 215  HighTech  LeCherif 0.5714286 0.4000000    2
+## 216  HighTech     LeCyp 0.7500000 0.6000000    3
+## 217  HighTech  TheTouks 0.5714286 0.4000000    2
+## 218     Borio  LeDidier 0.2857143 0.1666667    1
+## 219     Borio      Abib 0.5714286 0.4000000    2
+## 220     Borio   Cédrico 0.7500000 0.6000000    3
+## 221     Borio      Roma 0.7500000 0.6000000    3
+## 222     Borio     Afann 0.2857143 0.1666667    1
+## 223     Borio  LeCherif 0.5714286 0.4000000    2
+## 224     Borio     LeCyp 1.0000000 1.0000000    4
+## 225     Borio  TheTouks 0.5714286 0.4000000    2
+## 226  LeDidier      Abib 0.6666667 0.5000000    2
+## 227  LeDidier   Cédrico 0.5714286 0.4000000    2
+## 228  LeDidier      Roma 0.5714286 0.4000000    2
+## 229  LeDidier     Afann 0.6666667 0.5000000    2
+## 230  LeDidier  LeCherif 0.6666667 0.5000000    2
+## 231  LeDidier     LeCyp 0.2857143 0.1666667    1
+## 232  LeDidier  TheTouks 0.6666667 0.5000000    2
+## 233      Abib   Cédrico 0.5714286 0.4000000    2
+## 234      Abib      Roma 0.2857143 0.1666667    1
+## 235      Abib     Afann 0.3333333 0.2000000    1
+## 236      Abib  LeCherif 1.0000000 1.0000000    3
+## 237      Abib     LeCyp 0.5714286 0.4000000    2
+## 238      Abib  TheTouks 0.6666667 0.5000000    2
+## 239   Cédrico      Roma 0.7500000 0.6000000    3
+## 240   Cédrico     Afann 0.2857143 0.1666667    1
+## 241   Cédrico  LeCherif 0.5714286 0.4000000    2
+## 242   Cédrico     LeCyp 0.7500000 0.6000000    3
+## 243   Cédrico  TheTouks 0.8571429 0.7500000    3
+## 244      Roma     Afann 0.5714286 0.4000000    2
+## 245      Roma  LeCherif 0.2857143 0.1666667    1
+## 246      Roma     LeCyp 0.7500000 0.6000000    3
+## 247      Roma  TheTouks 0.5714286 0.4000000    2
+## 248     Afann  LeCherif 0.3333333 0.2000000    1
+## 249     Afann     LeCyp 0.2857143 0.1666667    1
+## 250     Afann  TheTouks 0.3333333 0.2000000    1
+## 251  LeCherif     LeCyp 0.5714286 0.4000000    2
+## 252  LeCherif  TheTouks 0.6666667 0.5000000    2
+## 253     LeCyp  TheTouks 0.5714286 0.4000000    2</code></pre>
+<pre><code>##          temp    N0  NODF Cscore
+## p.value 0.642 0.304 0.486  0.274</code></pre>
+<p><img src="/post/graphinterac_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre><code>## NULL</code></pre>
+<pre><code>##   dim(SIMcooc) dim(SIMsor)
+## 1          253         253
+## 2         1000        1000</code></pre>
+<pre><code>##         from       to Sor Jac cooc p.val.cooc p.val.sor
+## 9   Bertholo Sorelite   0   0    0      0.036     0.036
+## 112    Reine  Cédrico   0   0    0      0.046     0.046
+## 118    Nelly    Astro   0   0    0      0.036     0.036
+## 214 HighTech    Afann   0   0    0      0.044     0.044
+## 236     Abib LeCherif   1   1    3      0.046     0.046</code></pre>
+</div>
+<div id="representations-graphiques" class="section level2">
+<h2>Représentations graphiques</h2>
+<div id="representation-non-interactine" class="section level3">
+<h3>Représentation non interactine</h3>
+<p><img src="/post/graphinterac_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+<div id="representation-interactive" class="section level3">
+<h3>Représentation interactive</h3>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="forceNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"links":{"source":[3,8,7,5,0],"target":[9,4,2,1,6],"value":[1,1,1,1,2.71828182845905],"colour":["gray","gray","gray","gray","gray"]},"nodes":{"name":["Abib","Afann","Astro","Bertholo","Cédrico","HighTech","LeCherif","Nelly","Reine","Sorelite"],"group":["Bert","Rein","Nell","High","Abib","Sore","Cédr","Astr","Afan","LeCh"],"nodesize":[5,5,5,5,5,5,5,5,5,5]},"options":{"NodeID":"species","Group":"group","colourScale":"d3.scaleOrdinal(d3.schemeCategory20);","fontSize":20,"fontFamily":"serif","clickTextSize":50,"linkDistance":90,"linkWidth":"function(d) { return Math.sqrt(d.value); }","charge":-30,"opacity":0.9,"zoom":false,"legend":true,"arrows":false,"nodesize":true,"radiusCalculation":" Math.sqrt(d.nodesize)+6","bounded":false,"opacityNoHover":0,"clickAction":null}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
