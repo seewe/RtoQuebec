@@ -38,8 +38,8 @@ Les données de ce papier sont fictives. Il s'agit d'un ensemble de $23$ étudia
 
 ```{r echo=FALSE}
 etudiants<-read.table("F:/codeSources/etudiants.txt",header = TRUE, sep = "\t")
-Mpa.etud<-as.matrix(etudiants[,-1])  ;   row.names(Mpa.etud)<-etudiants[,1]
-etudiants
+Mpa.etud<-as.matrix(etudiants[,-c(2,1)])  ;   row.names(Mpa.etud)<-etudiants[,1]
+head(etudiants,5)
 ```
 
 ## La matrice de lien significatif entre les étudiants
@@ -85,20 +85,22 @@ SIMcooc<-matrix(0,nobs,simul) ;  SIMsor<-matrix(0,nobs,simul)  # matrice des ind
 pb <- winProgressBar(title = "progress bar", min = 0, max = simul, width = 300)
 for (i in 1:simul){
   simcooc<-distance(Smpa.etud[,,i])  ;  SIMcooc[,i]<-simcooc$cooc  ;  SIMsor[,i]<-simcooc$Sor
-setWinProgressBar(pb, i, title=paste( round(i/simul*100, 0),"% of iterations done (",i,")"))
+  setWinProgressBar(pb, i, title=paste( round(i/simul*100, 0),"% of iterations done (",i,")"))
 }  
-close(pb)  ;  header(cbind.data.frame( dim(SIMcooc)  ,  dim(SIMsor) ),5)
+close(pb)  ;  cbind.data.frame( dim(SIMcooc)  ,  dim(SIMsor) )  ;  remove(simcooc)
 
 # Les cooccurrences significatives
 combi<-dim(OBSdist)[1]
-for (i in 1:combi){   
+for (i in 1:combi){
   OBSdist$p.val.cooc[i]<-Exactest(OBSdist$cooc[i],SIMcooc[i,])
-  OBSdist$p.val.sor[i]<-Exactest(OBSdist$Sor[i],SIMsor[i,])
+  OBSdist$meanSimCooc[i]<-mean(SIMcooc[i,])
+  if(OBSdist$cooc[i]>mean(SIMcooc[i,])){
+    OBSdist$sens.cooc[i]<-"Similarite"
+  }else if((OBSdist$cooc[i]<mean(SIMcooc[i,]))){
+    OBSdist$sens.cooc[i]<-"Dissimilarite"
+  }
 }
-Test.cooc<-OBSdist[OBSdist$p.val.cooc<=0.05,]  ;  Test.cooc
-Test.sor<-OBSdist[OBSdist$p.val.sor<=0.05,]  #;  Test.sor
-
-
+Test.cooc<-OBSdist[OBSdist$p.val.cooc<=0.40,]  ;  Test.cooc
 
 ```
 
@@ -127,18 +129,29 @@ plot.igraph(g,
 
 ### Représentation interactive
 ```{r echo=FALSE}
-vertx<-as.factor(vertex.attributes(g)$name)  ;  lengthh<-length(vertx)
+vertx<-as.factor(vertex.attributes(g)$name)  ;  nnod<-length(vertx)
 netw3d.from<-as.character(Test.cooc$from)   ;  netw3d.to<-as.character(Test.cooc$to)
 
-MyNodes<-data.frame( species=levels(vertx) , group=factor(substr(vertx,1,4)) , size=rep(5,lengthh))
+MyNodes<-data.frame( species=levels(vertx) )  ;  group<-c()
+for (i in 1:nnod) {
+  grp<-as.character(etudiants[as.character(etudiants$Etudiants)==as.character(MyNodes[i,]),2])
+  group<-c(group,grp)
+}
+MyNodes<-data.frame( student=levels(vertx) , group=factor(group) , size=rep(5,nnod))
+
 
 MyLinks<-data.frame(from=as.double(factor(netw3d.from,levels(vertx)))-1, # On fait -1 pour indexer à 0
                     to=as.double(factor(netw3d.to,levels(vertx)))-1,     # On fait -1 pour indexer à 0
-                    Sor=exp(Test.cooc$Sor) )  # exp() pour ne pas avoir des liens nuls
+                    Cooc=Test.cooc$cooc+1, typeLink=as.factor(Test.cooc$sens.cooc ))  # +1 pour eviter des liens nuls
 
-forceNetwork(Links = MyLinks, Nodes = MyNodes, Source = "from", Target = "to", Value = "Sor",
-             NodeID = "species", Group = "group", opacity = 0.9, Nodesize = "size", 
-             linkDistance = 90, fontSize = 20, linkColour = "gray", legend = TRUE)
+MyLinks$Linkcolor<-Colinks<-ifelse(MyLinks$typeLink=="Similarite","green","red")
+
+head(MyNodes,3)  ;  head(MyLinks,3)
+
+
+forceNetwork(Links = MyLinks, Nodes = MyNodes, Source = "from", Target = "to", Value = "Cooc",
+             NodeID = "student", Group = "group", opacity = 0.9, Nodesize = "size", 
+             linkDistance = 90, fontSize = 20, linkColour = Colinks, legend = TRUE)
 ```
 
 
