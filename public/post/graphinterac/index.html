@@ -53,6 +53,15 @@
 <script src="/rmarkdown-libs/forceNetwork-binding/forceNetwork.js"></script>
 
 
+<div id="les-packages-r-utilises-dans-le-tutoriel" class="section level1">
+<h1>LES PACKAGES R UTILISÉS DANS LE TUTORIEL</h1>
+<pre class="r"><code>library(dplyr)     # POUR MANIPULER LES JEUX DE DONNÉES
+library(vegan)     # POUR FAIRE LES NULL MODELS
+library(parallel)  # POUR LES CALCULS EN PARALÈLES
+library(igraph)    # POUR CONSTRUIRE LES RESEAUX NON INTERACTIFS
+library(rgl)       # POUR LES REPRÉSENTATIONS EN 3D
+library(networkD3) # POUR CONSTRUIRE LES RESEAUX INTERACTIFS</code></pre>
+</div>
 <div id="introduction" class="section level1">
 <h1>INTRODUCTION</h1>
 <p>La représentation graphique des données reste un moyen important pour l’exploration de l’information contenue dans les jeux de données. Ce tutoriel montre comment procéder pour construire un graphe interactif avec <code>R</code>.</p>
@@ -87,27 +96,32 @@ La suite du tutoriel essaye de répondre à toutes ces interrogations.</p>
 L’idée des <code>null models</code> est de comparer le hasard à ce qui est observée. Si le jeu de données observé ressemble aux jeux de données obtenus dans une situation de hasard alors on dira qu’il n’existe aucune structure de regroupement dans la communauté. Sinon, il existe une structure particulière qu’il faut analyser. Cette notion est très utilisée en biologie, plus particulièrement en écologie.<br />
 Pour faire le parallèle avec notre exemple, les étudiants sont similaires aux espèces et les activités sont similaires aux sites.</p>
 <pre><code>##         Indice_temperature Indice_N0 Indice_NODF Indice_Cscore
-## p.value               0.52     0.828       0.474          0.07</code></pre>
-<p><img src="/post/graphinterac_files/figure-html/unnamed-chunk-2-1.png" width="1248" /></p>
+## p.value               0.37       0.8       0.434         0.068</code></pre>
+<p><img src="/post/graphinterac_files/figure-html/unnamed-chunk-3-1.png" width="1248" /></p>
 </div>
 <div id="la-matrice-de-liens-significatifs-entre-les-etudiants" class="section level2">
 <h2>La matrice de liens significatifs entre les étudiants</h2>
 <p>Pour analyser la structure de cooccurrence détectée ci-dessus, le tutoriel mesure le lien entre les étudiants. On peut utiliser plusieurs métrique pour quantifier la distance entre deux étudiants. Dans ce contexte particulier, l’indice de simmilarité de <code>Sorensen</code> est la plus courante. Cette diatance mesure la similarité ou la dissimilarité entre deux entités de la <code>Mpa</code>. Un lien est significatif lorsqu’il est très différent des liens déterminé par le hasard. Le tableau ci dessous présente la matrice de lien entre les étudiants, leur niveau de significativité et leur type (similarité ou dissimilarité).<br />
 La variable <code>Cooc</code> mesure le niveau de cooccurrence entre les espèces. En fait, il représente le nombre de fois où deux étudiants se sont retrouvé dans la même activité. Si sa valeur est plus faible que la moyenne alors les etudiants sont dissimilaires, sinon ils sont similaires. Pour représenter un reseau important, le seuil de significativité d’un lien a été fixé à <span class="math inline">\(\alpha=21\%\)</span>. Pour des études réelles, il est conseillé de choisir l’un des seuils suivants : <span class="math inline">\(10\%\)</span> , <span class="math inline">\(5\%\)</span> ou <span class="math inline">\(1\%\)</span>.</p>
 <pre><code>## NULL</code></pre>
-<pre><code>##        from       to  Sor cooc p.val.cooc meanSimCooc     sens.cooc
-## 1  Bertholo    Vanou 1.00    4      0.074       2.332    Similarite
-## 9  Bertholo Sorelite 0.00    0      0.038       1.747 Dissimilarite
-## 18 Bertholo     Roma 0.25    1      0.200       2.328 Dissimilarite
-## 30    Vanou Sorelite 0.00    0      0.060       1.705 Dissimilarite
-## 79  LeMaham    Afann 0.00    0      0.174       1.322 Dissimilarite</code></pre>
+<pre><code>##         from       to  Sor cooc p.val.cooc meanSimCooc     sens.cooc
+## 1   Bertholo    Vanou 1.00    4      0.060       2.294    Similarite
+## 9   Bertholo Sorelite 0.00    0      0.058       1.755 Dissimilarite
+## 18  Bertholo     Roma 0.25    1      0.208       2.317 Dissimilarite
+## 30     Vanou Sorelite 0.00    0      0.046       1.732 Dissimilarite
+## 109    Reine    Borio 0.00    0      0.064       1.722 Dissimilarite</code></pre>
 </div>
 <div id="representations-graphiques" class="section level2">
 <h2>Représentations graphiques</h2>
 <div id="representation-du-graphe-non-interactif" class="section level3">
 <h3>Représentation du graphe non interactif</h3>
 <p>Cette représentation ne permet pas d’interagir avec le graphique. Il est possible de pondérer les liens du réseau par un poids mais il reste difficile d’y ajouter des couleurs relativement à un facteur. Pour plus de précision sur ce type de représentation, le lecteur peut consulter la page suivante : <a href="https://www.rdocumentation.org/packages/igraph/versions/1.2.2/topics/plot.igraph">igraph</a></p>
-<pre class="r"><code># Définir les couleurs du graphe
+<pre class="r"><code>###########################################
+# CODE R POUR CONSTRUIRE LES RESEAUX NONS #
+# INTERACTIFS                             #
+###########################################
+
+# Définir les couleurs du graphe
 color1&lt;-&quot;darkseagreen2&quot; ; color2&lt;-&quot;lightblue1&quot; ; color3&lt;-&quot;black&quot;
 
 # Jeu de données pour représenter le graphe
@@ -125,7 +139,7 @@ plot.igraph(g,
      vertex.size=18,
      edge.color=color3
 )</code></pre>
-<p><img src="/post/graphinterac_files/figure-html/unnamed-chunk-4-1.png" width="1248" /></p>
+<p><img src="/post/graphinterac_files/figure-html/unnamed-chunk-5-1.png" width="1248" /></p>
 </div>
 <div id="representation-du-graphe-interactif" class="section level3">
 <h3>Représentation du graphe interactif</h3>
@@ -136,40 +150,57 @@ plot.igraph(g,
 <li><p>Le data frame <code>MyLinks</code>: décrit les liens du réseau. Il a deux variables obligatoires et plusieurs autres facultatives. Chaque ligne de ce jeu de données représente un lien du réseau. Un lien est caractérisé par l’origine (<code>from</code>) et la destination (<code>to</code>), le poids du lien (<code>Cooc</code>, caractéristique facultative), le groupe d’appartenance du lien (<code>typeLink</code>, une variable de type factor) etc. NB: les variables <code>from</code> et <code>to</code> doivent être les numéros des facteurs définis dans le data frame <code>MyNodes</code>. Pour représenter le réseau, la fonction utilise un code JavaScript. Pour cette raison, les variables d’origine-destination du réseau sont indexés à <span class="math inline">\(0\)</span> (les numéros des facteurs doivent commencer à <span class="math inline">\(0\)</span>).</p></li>
 </ul>
 <p>Ci-dessous, vous verrez le code et l’en-tête des data frame utilisés pour construire le reseau des étudiants basé sur leur fréquentation commune de certaines activités extra scolaire.</p>
-<pre class="r"><code># Les noeuds du graphe
-vertx&lt;-as.factor(vertex.attributes(g)$name)  ;  nnod&lt;-length(vertx)
-netw3d.from&lt;-as.character(Test.cooc$from)   ;  netw3d.to&lt;-as.character(Test.cooc$to)
+<pre class="r"><code>######################################################
+# CODE R POUR CONSTRUIRE UN RESEAU INTERACTIF AVEC R #
+######################################################
+
+# Les noeuds du graphe
+vertx&lt;-as.factor(vertex.attributes(g)$name) 
+nnod&lt;-length(vertx)
+netw3d.from&lt;-as.character(Test.cooc$from)  
+netw3d.to&lt;-as.character(Test.cooc$to)
 
 # Création du jeu de données de description des noeud
+# Nom des noeuds
 MyNodes&lt;-data.frame( species=levels(vertx) )  ;  group&lt;-c()
+# Groupe des noeuds
 for (i in 1:nnod) {
-  grp&lt;-as.character(etudiants[as.character(etudiants$Etudiants)==as.character(MyNodes[i,]),2])
+  nom.e&lt;-as.character(etudiants$Etudiants)
+  grp.e&lt;-etudiants[nom.e==as.character(MyNodes[i,]),2]
+  grp&lt;-as.character(grp.e)
   group&lt;-c(group,grp)
 }
-MyNodes&lt;-data.frame( student=levels(vertx) , group=factor(group) , size=rep(5,nnod))
+# resultat
+MyNodes&lt;-data.frame( student=levels(vertx) , 
+                     group=factor(group) , 
+                     size=rep(5,nnod))
 
-# Jeu de données qui spécifie les liens entre les étudiants
-MyLinks&lt;-data.frame(from=as.double(factor(netw3d.from,levels(vertx)))-1, # On fait -1 pour indexer à 0
-                    to=as.double(factor(netw3d.to,levels(vertx)))-1,     # On fait -1 pour indexer à 0
-                    Cooc=Test.cooc$cooc+1,                               # +1 pour eviter des liens nuls
+# Jeu de données qui spécifie les liens entre les étudiants 
+# ( On fait -1 pour indexer à 0)
+# (+1 pour eviter des liens nuls)
+MyLinks&lt;-data.frame(from=as.double(factor(netw3d.from,levels(vertx)))-1, 
+                    to=as.double(factor(netw3d.to,levels(vertx)))-1,     
+                    Cooc=Test.cooc$cooc+1,                               
                     typeLink=as.factor(Test.cooc$sens.cooc ))  
 
 # Vecteur de couleur des liens entre les étudiants
-MyLinks$Linkcolor&lt;-Colinks&lt;-ifelse(MyLinks$typeLink==&quot;Similarite&quot;,&quot;black&quot;,&quot;red&quot;)
-
+Colinks&lt;-ifelse(MyLinks$typeLink==&quot;Similarite&quot;,&quot;black&quot;,&quot;red&quot;)
+MyLinks$Linkcolor&lt;-Colinks
 # Représentation du graphe
-forceNetwork(Links = MyLinks, Nodes = MyNodes, Source = &quot;from&quot;, Target = &quot;to&quot;, Value = &quot;Cooc&quot;,
-             NodeID = &quot;student&quot;, Group = &quot;group&quot;, opacity = 0.9, Nodesize = &quot;size&quot;, 
-             linkDistance = 90, fontSize = 20, linkColour = Colinks, legend = TRUE)</code></pre>
+forceNetwork(Links = MyLinks, Nodes = MyNodes, Source = &quot;from&quot;, 
+             Target = &quot;to&quot;, Value = &quot;Cooc&quot;, NodeID = &quot;student&quot;, 
+             Group = &quot;group&quot;, opacity = 0.9, Nodesize = &quot;size&quot;, 
+             linkDistance = 90, fontSize = 20, linkColour = Colinks, 
+             legend = TRUE)</code></pre>
 <div id="htmlwidget-1" style="width:672px;height:480px;" class="forceNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-1">{"x":{"links":{"source":[2,2,2,14,7,9,9,8,8,12,5,0,4],"target":[14,11,10,11,1,3,13,4,13,1,1,6,13],"value":[5,1,2,1,1,1,2,1,1,1,1,3,5],"colour":["black","red","red","red","red","red","red","red","red","red","red","black","black"]},"nodes":{"name":["Abib","Afann","Bertholo","Borio","Cedrico","HighTech","LeCherif","LeMaham","Nelly","Reine","Roma","Sorelite","ThePig","TheTouks","Vanou"],"group":["grp1","grp4","grp4","grp2","grp2","grp1","grp2","grp2","grp4","grp4","grp1","grp1","grp1","grp2","grp4"],"nodesize":[5,5,5,5,5,5,5,5,5,5,5,5,5,5,5]},"options":{"NodeID":"student","Group":"group","colourScale":"d3.scaleOrdinal(d3.schemeCategory20);","fontSize":20,"fontFamily":"serif","clickTextSize":50,"linkDistance":90,"linkWidth":"function(d) { return Math.sqrt(d.value); }","charge":-30,"opacity":0.9,"zoom":false,"legend":true,"arrows":false,"nodesize":true,"radiusCalculation":" Math.sqrt(d.nodesize)+6","bounded":false,"opacityNoHover":0,"clickAction":null}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"links":{"source":[2,2,2,13,9,9,8,8,8,8,6,0,4],"target":[13,11,10,11,3,4,5,3,4,12,1,7,12],"value":[5,1,2,1,1,2,1,1,1,1,1,3,5],"colour":["black","red","red","red","red","red","red","red","red","red","red","black","black"]},"nodes":{"name":["Abib","Afann","Bertholo","Borio","Cedrico","Florent","HighTech","LeCherif","Nelly","Reine","Roma","Sorelite","TheTouks","Vanou"],"group":["grp1","grp4","grp4","grp2","grp2","grp4","grp1","grp2","grp4","grp4","grp1","grp1","grp2","grp4"],"nodesize":[5,5,5,5,5,5,5,5,5,5,5,5,5,5]},"options":{"NodeID":"student","Group":"group","colourScale":"d3.scaleOrdinal(d3.schemeCategory20);","fontSize":20,"fontFamily":"serif","clickTextSize":50,"linkDistance":90,"linkWidth":"function(d) { return Math.sqrt(d.value); }","charge":-30,"opacity":0.9,"zoom":false,"legend":true,"arrows":false,"nodesize":true,"radiusCalculation":" Math.sqrt(d.nodesize)+6","bounded":false,"opacityNoHover":0,"clickAction":null}},"evals":[],"jsHooks":[]}</script>
 <p><code>Les dataframe MyNodes et MyLinks</code></p>
 <pre><code>##    student group size
 ## 1     Abib  grp1    5
 ## 2    Afann  grp4    5
 ## 3 Bertholo  grp4    5</code></pre>
 <pre><code>##   from to Cooc      typeLink Linkcolor
-## 1    2 14    5    Similarite     black
+## 1    2 13    5    Similarite     black
 ## 2    2 11    1 Dissimilarite       red
 ## 3    2 10    2 Dissimilarite       red</code></pre>
 </div>

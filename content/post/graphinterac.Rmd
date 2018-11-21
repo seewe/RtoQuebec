@@ -16,6 +16,18 @@ output:
 weight: 10
 ---
 
+# LES PACKAGES R UTILISÉS DANS LE TUTORIEL
+```{r eval=FALSE}
+library(dplyr)     # POUR MANIPULER LES JEUX DE DONNÉES
+library(vegan)     # POUR FAIRE LES NULL MODELS
+library(parallel)  # POUR LES CALCULS EN PARALÈLES
+library(igraph)    # POUR CONSTRUIRE LES RESEAUX NON INTERACTIFS
+library(rgl)       # POUR LES REPRÉSENTATIONS EN 3D
+library(networkD3) # POUR CONSTRUIRE LES RESEAUX INTERACTIFS
+```
+
+
+
 # INTRODUCTION
 
   La représentation graphique des données reste un moyen important pour l'exploration de l'information contenue dans les jeux de données. Ce tutoriel montre comment procéder pour construire un graphe interactif avec `R`.
@@ -124,6 +136,10 @@ Test.cooc<-OBSdist[OBSdist$p.val.cooc<=0.21,]  ;  head(Test.cooc[,-4],5)
 Cette représentation ne permet pas d'interagir avec le graphique. Il est possible de pondérer les liens du réseau par un poids mais il reste difficile d'y ajouter des couleurs relativement à un facteur. Pour plus de précision sur ce type de représentation, le lecteur peut consulter la page suivante : [igraph](https://www.rdocumentation.org/packages/igraph/versions/1.2.2/topics/plot.igraph)
 
 ```{r fig.width=13}
+###########################################
+# CODE R POUR CONSTRUIRE LES RESEAUX NONS #
+# INTERACTIFS                             #
+###########################################
 
 # Définir les couleurs du graphe
 color1<-"darkseagreen2" ; color2<-"lightblue1" ; color3<-"black"
@@ -157,32 +173,48 @@ Pour arriver à un tel résultat, la fonction prend en entré plusieurs argument
 Ci-dessous, vous verrez le code et l'en-tête des data frame utilisés pour construire le reseau des étudiants basé sur leur fréquentation commune de certaines activités extra scolaire.
 
 ```{r fig.width=7}
+######################################################
+# CODE R POUR CONSTRUIRE UN RESEAU INTERACTIF AVEC R #
+######################################################
 
 # Les noeuds du graphe
-vertx<-as.factor(vertex.attributes(g)$name)  ;  nnod<-length(vertx)
-netw3d.from<-as.character(Test.cooc$from)   ;  netw3d.to<-as.character(Test.cooc$to)
+vertx<-as.factor(vertex.attributes(g)$name) 
+nnod<-length(vertx)
+netw3d.from<-as.character(Test.cooc$from)  
+netw3d.to<-as.character(Test.cooc$to)
 
 # Création du jeu de données de description des noeud
+# Nom des noeuds
 MyNodes<-data.frame( species=levels(vertx) )  ;  group<-c()
+# Groupe des noeuds
 for (i in 1:nnod) {
-  grp<-as.character(etudiants[as.character(etudiants$Etudiants)==as.character(MyNodes[i,]),2])
+  nom.e<-as.character(etudiants$Etudiants)
+  grp.e<-etudiants[nom.e==as.character(MyNodes[i,]),2]
+  grp<-as.character(grp.e)
   group<-c(group,grp)
 }
-MyNodes<-data.frame( student=levels(vertx) , group=factor(group) , size=rep(5,nnod))
+# resultat
+MyNodes<-data.frame( student=levels(vertx) , 
+                     group=factor(group) , 
+                     size=rep(5,nnod))
 
-# Jeu de données qui spécifie les liens entre les étudiants
-MyLinks<-data.frame(from=as.double(factor(netw3d.from,levels(vertx)))-1, # On fait -1 pour indexer à 0
-                    to=as.double(factor(netw3d.to,levels(vertx)))-1,     # On fait -1 pour indexer à 0
-                    Cooc=Test.cooc$cooc+1,                               # +1 pour eviter des liens nuls
+# Jeu de données qui spécifie les liens entre les étudiants 
+# ( On fait -1 pour indexer à 0)
+# (+1 pour eviter des liens nuls)
+MyLinks<-data.frame(from=as.double(factor(netw3d.from,levels(vertx)))-1, 
+                    to=as.double(factor(netw3d.to,levels(vertx)))-1,     
+                    Cooc=Test.cooc$cooc+1,                               
                     typeLink=as.factor(Test.cooc$sens.cooc ))  
 
 # Vecteur de couleur des liens entre les étudiants
-MyLinks$Linkcolor<-Colinks<-ifelse(MyLinks$typeLink=="Similarite","black","red")
-
+Colinks<-ifelse(MyLinks$typeLink=="Similarite","black","red")
+MyLinks$Linkcolor<-Colinks
 # Représentation du graphe
-forceNetwork(Links = MyLinks, Nodes = MyNodes, Source = "from", Target = "to", Value = "Cooc",
-             NodeID = "student", Group = "group", opacity = 0.9, Nodesize = "size", 
-             linkDistance = 90, fontSize = 20, linkColour = Colinks, legend = TRUE)
+forceNetwork(Links = MyLinks, Nodes = MyNodes, Source = "from", 
+             Target = "to", Value = "Cooc", NodeID = "student", 
+             Group = "group", opacity = 0.9, Nodesize = "size", 
+             linkDistance = 90, fontSize = 20, linkColour = Colinks, 
+             legend = TRUE)
 ```
 
 
