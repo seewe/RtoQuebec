@@ -42,10 +42,10 @@ library(networkD3) # POUR CONSTRUIRE LES RESEAUX INTERACTIFS
 
 # EXEMPLE PRATIQUE : REPRÉSENTATION DES LIENS ENTRE LES ÉTUDIANTS
 
-Les données de ce papier sont fictives. Il s'agit d'un ensemble de $23$ étudiants d'une salle de classe qui participent aux activités parascolaires chaque fin de semaines. Sur la base de leur participation aux activités, le papier représente graphiquement les liens significatifs (et leur sens) qui existent entre les étudiants.
+Les données de ce papier sont fictives. Il s'agit d'un ensemble de `23` étudiants d'une salle de classe qui participent aux activités parascolaires chaque fin de semaines. Sur la base de leur participation aux activités, le papier représente graphiquement les liens significatifs (et leur sens) qui existent entre les étudiants.
 
 ## La matrice de présence-absence (Mpa) aux activités parascolaires
-Les lignes de la Mpa représentent les étudiants et les colonnes représentent les activités. Une cellule $(i,j)$ est évaluée à $1$ si l'étudiant $i$ participe à l'activité $j$. Elle est évaluée à $0$ si l'étudiant $i$ ne participe pas à l'activité $j$.  
+Les lignes de la Mpa représentent les étudiants et les colonnes représentent les activités. Une cellule `(i,j)` est évaluée à `1` si l'étudiant `i` participe à l'activité `j`. Elle est évaluée à `0` si l'étudiant `i` ne participe pas à l'activité `j`.  
 Pour cet exemple, les étudiants fréquentent plus les `restaurants` pendant leur fin de semaine et participent plus aux parties de `soccer` ou de `cinéma`. Ils se rendent très peu à la `ferme` et à la `bibliothèque` pendant le week-end.  
 `Maxi` et la `LaHossou` sont les deux étudiants qui participent le plus aux activités en fin de semaine. Le premier est absent des activités réligieuses et le second ne se rend pas dans les clubs de dance. Par contre, `LeDidier` et `LeCherif` sont des étudiants très casaniers. Le premier se rend uniquement dans des club de dance et le second participe aux activités religieuses et se rend au restaurant.    
 Face à cette description, est ce vrai de croire que `Maxi` et `LaHossou` ont un lien de similarité particulier ? ou encore, existe t-il un lien de dissimilarité entre `Maxi` et `LeCherif` ou entre `LaHossou` et `LeDidier`?  
@@ -99,7 +99,7 @@ hist(Sind.etud$Cscore, main = "Cscore", freq = FALSE, xlab = "Cscore")  ;  ablin
 ## La matrice de liens significatifs entre les étudiants
 
 Pour analyser la structure de cooccurrence détectée ci-dessus, le tutoriel mesure le lien entre les étudiants. On peut utiliser plusieurs métrique pour quantifier la distance entre deux étudiants. Dans ce contexte particulier, l'indice de simmilarité de `Sorensen` est la plus courante. Cette diatance mesure la similarité ou la dissimilarité entre deux entités de la `Mpa`. Un lien est significatif lorsqu'il est très différent des liens déterminé par le hasard. Le tableau ci dessous présente la matrice de lien entre les étudiants, leur niveau de significativité et leur type (similarité ou dissimilarité).  
-La variable `Cooc` mesure le niveau de cooccurrence entre les espèces. En fait, il représente le nombre de fois où deux étudiants se sont retrouvé dans la même activité. Si sa valeur est plus faible que la moyenne alors les etudiants sont dissimilaires, sinon ils sont similaires. Pour représenter un reseau important, le seuil de significativité d'un lien a été fixé à $\alpha=21\%$. Pour des études réelles, il est conseillé de choisir l'un des seuils suivants : $10\%$ , $5\%$ ou $1\%$.
+La variable `Cooc` mesure le niveau de cooccurrence entre les espèces. En fait, il représente le nombre de fois où deux étudiants se sont retrouvé dans la même activité. Si sa valeur est plus faible que la moyenne alors les etudiants sont dissimilaires, sinon ils sont similaires. Pour représenter un reseau important, le seuil de significativité d'un lien a été fixé à `alpha=21%`. Pour des études réelles, il est conseillé de choisir l'un des seuils suivants : `10%` , `5%` ou `1%`.
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -168,7 +168,7 @@ Pour arriver à un tel résultat, la fonction prend en entré plusieurs argument
 
 - Le data frame `MyNodes`: décrit les noeuds du réseau. On y retrouve les noms des noeuds, leur groupe d'appartenance et leur taille. Les deux dernière variables sont facultatives. Seule la première variable est obligatoire et doit être de type `factor`.  
 
-- Le data frame `MyLinks`: décrit les liens du réseau. Il a deux variables obligatoires et plusieurs autres facultatives. Chaque ligne de ce jeu de données représente un lien du réseau. Un lien est caractérisé par l'origine (`from`) et la destination (`to`), le poids du lien (`Cooc`, caractéristique facultative), le groupe d'appartenance du lien (`typeLink`, une variable de type factor) etc. NB: les variables `from` et `to` doivent être les numéros des facteurs définis dans le data frame `MyNodes`. Pour représenter le réseau, la fonction utilise un code JavaScript. Pour cette raison, les variables d'origine-destination du réseau sont indexés à $0$ (les numéros des facteurs doivent commencer à $0$).  
+- Le data frame `MyLinks`: décrit les liens du réseau. Il a deux variables obligatoires et plusieurs autres facultatives. Chaque ligne de ce jeu de données représente un lien du réseau. Un lien est caractérisé par l'origine (`from`) et la destination (`to`), le poids du lien (`Cooc`, caractéristique facultative), le groupe d'appartenance du lien (`typeLink`, une variable de type factor) etc. NB: les variables `from` et `to` doivent être les numéros des facteurs définis dans le data frame `MyNodes`. Pour représenter le réseau, la fonction utilise un code JavaScript. Pour cette raison, les variables d'origine-destination du réseau sont indexés à `0` (les numéros des facteurs doivent commencer à `0`).  
 
 Ci-dessous, vous verrez le code et l'en-tête des data frame utilisés pour construire le reseau des étudiants basé sur leur fréquentation commune de certaines activités extra scolaire.
 
