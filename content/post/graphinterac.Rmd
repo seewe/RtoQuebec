@@ -218,7 +218,7 @@ forceNetwork(Links = MyLinks, Nodes = MyNodes, Source = "from",
 ```
 
 
-`Les dataframe MyNodes et MyLinks`
+`Les data frame MyNodes et MyLinks`
 
 ```{r echo=FALSE}
 head(MyNodes,3)
