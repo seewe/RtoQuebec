@@ -53,7 +53,7 @@ La suite du tutoriel essaye de répondre à toutes ces interrogations.
 ```{r echo=FALSE}
 etudiants<-read.table("F:/codeSources/etudiants.txt",header = TRUE, sep = "\t")
 Mpa.etud<-as.matrix(etudiants[,-c(2,1)])  ;   row.names(Mpa.etud)<-etudiants[,1]
-head(etudiants,5)
+etudiants
 ```
 
 ## La structure de regroupement des étudiants
