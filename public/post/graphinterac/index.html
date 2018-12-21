@@ -83,12 +83,30 @@ Pour cet exemple, les étudiants fréquentent plus les <code>restaurants</code> 
 <code>Maxi</code> et la <code>LaHossou</code> sont les deux étudiants qui participent le plus aux activités en fin de semaine. Le premier est absent des activités réligieuses et le second ne se rend pas dans les clubs de dance. Par contre, <code>LeDidier</code> et <code>LeCherif</code> sont des étudiants très casaniers. Le premier se rend uniquement dans des club de dance et le second participe aux activités religieuses et se rend au restaurant.<br />
 Face à cette description, est ce vrai de croire que <code>Maxi</code> et <code>LaHossou</code> ont un lien de similarité particulier ? ou encore, existe t-il un lien de dissimilarité entre <code>Maxi</code> et <code>LeCherif</code> ou entre <code>LaHossou</code> et <code>LeDidier</code>?<br />
 La suite du tutoriel essaye de répondre à toutes ces interrogations.</p>
-<pre><code>##   Etudiants group Cine Soccer Biblio Club Religion Ferme Resto
-## 1  Bertholo  grp4    1      0      1    0        1     0     1
-## 2     Vanou  grp4    1      0      1    0        1     0     1
-## 3 Carmelito  grp4    1      1      1    1        0     0     0
-## 4   LeMaham  grp2    0      1      0    0        1     0     1
-## 5     Serge  grp2    1      1      0    0        0     1     1</code></pre>
+<pre><code>##    Etudiants group Cine Soccer Biblio Club Religion Ferme Resto
+## 1   Bertholo  grp4    1      0      1    0        1     0     1
+## 2      Vanou  grp4    1      0      1    0        1     0     1
+## 3  Carmelito  grp4    1      1      1    1        0     0     0
+## 4    LeMaham  grp2    0      1      0    0        1     0     1
+## 5      Serge  grp2    1      1      0    0        0     1     1
+## 6      Reine  grp4    0      0      1    0        1     1     1
+## 7      Nelly  grp4    0      0      1    0        1     1     0
+## 8      Astro  grp4    1      0      1    1        0     0     1
+## 9       Maxi  grp4    1      1      1    0        0     1     1
+## 10  Sorelite  grp1    0      1      0    1        0     1     0
+## 11    ThePig  grp1    0      1      0    1        0     0     1
+## 12  LaHossou  grp1    1      1      1    0        1     0     1
+## 13   Florent  grp4    1      1      0    0        0     0     1
+## 14  HighTech  grp1    0      1      0    1        1     0     1
+## 15     Borio  grp2    1      1      0    1        0     0     0
+## 16  LeDidier  grp4    0      0      0    1        0     0     0
+## 17      Abib  grp1    1      0      0    0        1     0     1
+## 18   Cedrico  grp2    1      1      0    1        0     0     1
+## 19      Roma  grp1    1      1      0    1        0     1     0
+## 20     Afann  grp4    1      0      1    0        0     1     0
+## 21  LeCherif  grp2    0      0      0    0        1     0     1
+## 22     LeCyp  grp1    1      0      1    1        1     0     0
+## 23  TheTouks  grp2    1      1      0    1        0     0     1</code></pre>
 </div>
 <div id="la-structure-de-regroupement-des-etudiants" class="section level2">
 <h2>La structure de regroupement des étudiants</h2>
@@ -96,7 +114,7 @@ La suite du tutoriel essaye de répondre à toutes ces interrogations.</p>
 L’idée des <code>null models</code> est de comparer le hasard à ce qui est observée. Si le jeu de données observé ressemble aux jeux de données obtenus dans une situation de hasard alors on dira qu’il n’existe aucune structure de regroupement dans la communauté. Sinon, il existe une structure particulière qu’il faut analyser. Cette notion est très utilisée en biologie, plus particulièrement en écologie.<br />
 Pour faire le parallèle avec notre exemple, les étudiants sont similaires aux espèces et les activités sont similaires aux sites.</p>
 <pre><code>##         Indice_temperature Indice_N0 Indice_NODF Indice_Cscore
-## p.value              0.162      0.85        0.77          0.07</code></pre>
+## p.value              0.212      0.91       0.852         0.052</code></pre>
 <p><img src="/post/graphinterac_files/figure-html/unnamed-chunk-3-1.png" width="1248" /></p>
 </div>
 <div id="la-matrice-de-liens-significatifs-entre-les-etudiants" class="section level2">
@@ -104,12 +122,12 @@ Pour faire le parallèle avec notre exemple, les étudiants sont similaires aux 
 <p>Pour analyser la structure de cooccurrence détectée ci-dessus, le tutoriel mesure le lien entre les étudiants. On peut utiliser plusieurs métrique pour quantifier la distance entre deux étudiants. Dans ce contexte particulier, l’indice de simmilarité de <code>Sorensen</code> est la plus courante. Cette diatance mesure la similarité ou la dissimilarité entre deux entités de la <code>Mpa</code>. Un lien est significatif lorsqu’il est très différent des liens déterminé par le hasard. Le tableau ci dessous présente la matrice de lien entre les étudiants, leur niveau de significativité et leur type (similarité ou dissimilarité).<br />
 La variable <code>Cooc</code> mesure le niveau de cooccurrence entre les espèces. En fait, il représente le nombre de fois où deux étudiants se sont retrouvé dans la même activité. Si sa valeur est plus faible que la moyenne alors les etudiants sont dissimilaires, sinon ils sont similaires. Pour représenter un reseau important, le seuil de significativité d’un lien a été fixé à <code>alpha=21%</code>. Pour des études réelles, il est conseillé de choisir l’un des seuils suivants : <code>10%</code> , <code>5%</code> ou <code>1%</code>.</p>
 <pre><code>## NULL</code></pre>
-<pre><code>##        from       to  Sor cooc p.val.cooc meanSimCooc     sens.cooc
-## 1  Bertholo    Vanou 1.00    4      0.070       2.295    Similarite
-## 9  Bertholo Sorelite 0.00    0      0.058       1.743 Dissimilarite
-## 18 Bertholo     Roma 0.25    1      0.206       2.359 Dissimilarite
-## 30    Vanou Sorelite 0.00    0      0.060       1.725 Dissimilarite
-## 39    Vanou     Roma 0.25    1      0.190       2.355 Dissimilarite</code></pre>
+<pre><code>##         from       to  Sor cooc p.val.cooc meanSimCooc     sens.cooc
+## 1   Bertholo    Vanou 1.00    4      0.078       2.335    Similarite
+## 9   Bertholo Sorelite 0.00    0      0.044       1.762 Dissimilarite
+## 18  Bertholo     Roma 0.25    1      0.208       2.330 Dissimilarite
+## 30     Vanou Sorelite 0.00    0      0.054       1.713 Dissimilarite
+## 109    Reine    Borio 0.00    0      0.052       1.739 Dissimilarite</code></pre>
 </div>
 <div id="representations-graphiques" class="section level2">
 <h2>Représentations graphiques</h2>
@@ -193,16 +211,16 @@ forceNetwork(Links = MyLinks, Nodes = MyNodes, Source = &quot;from&quot;,
              linkDistance = 90, fontSize = 20, linkColour = Colinks, 
              legend = TRUE)</code></pre>
 <div id="htmlwidget-1" style="width:672px;height:480px;" class="forceNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-1">{"x":{"links":{"source":[2,2,2,15,15,4,8,10,10,10,9,9,9,9,12,13,7,5],"target":[15,12,11,12,11,10,1,3,11,14,13,6,5,14,0,14,1,14],"value":[5,1,2,1,2,2,1,1,2,2,1,1,1,1,1,4,1,5],"colour":["black","red","red","red","red","red","red","red","red","red","red","red","red","red","red","black","red","black"]},"nodes":{"name":["Abib","Afann","Bertholo","Borio","Carmelito","Cedrico","Florent","HighTech","LeMaham","Nelly","Reine","Roma","Sorelite","ThePig","TheTouks","Vanou"],"group":["grp1","grp4","grp4","grp2","grp4","grp2","grp4","grp1","grp2","grp4","grp4","grp1","grp1","grp1","grp2","grp4"],"nodesize":[5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5]},"options":{"NodeID":"student","Group":"group","colourScale":"d3.scaleOrdinal(d3.schemeCategory20);","fontSize":20,"fontFamily":"serif","clickTextSize":50,"linkDistance":90,"linkWidth":"function(d) { return Math.sqrt(d.value); }","charge":-30,"opacity":0.9,"zoom":false,"legend":true,"arrows":false,"nodesize":true,"radiusCalculation":" Math.sqrt(d.nodesize)+6","bounded":false,"opacityNoHover":0,"clickAction":null}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"links":{"source":[1,1,1,12,7,7,7,6,6,6,6,10,4,5,3],"target":[12,9,8,9,2,8,11,10,2,3,11,0,11,0,11],"value":[5,1,2,1,1,2,2,1,1,1,1,1,4,1,5],"colour":["black","red","red","red","red","red","red","red","red","red","red","red","black","red","black"]},"nodes":{"name":["Afann","Bertholo","Borio","Cedrico","Florent","HighTech","Nelly","Reine","Roma","Sorelite","ThePig","TheTouks","Vanou"],"group":["grp4","grp4","grp2","grp2","grp4","grp1","grp4","grp4","grp1","grp1","grp1","grp2","grp4"],"nodesize":[5,5,5,5,5,5,5,5,5,5,5,5,5]},"options":{"NodeID":"student","Group":"group","colourScale":"d3.scaleOrdinal(d3.schemeCategory20);","fontSize":20,"fontFamily":"serif","clickTextSize":50,"linkDistance":90,"linkWidth":"function(d) { return Math.sqrt(d.value); }","charge":-30,"opacity":0.9,"zoom":false,"legend":true,"arrows":false,"nodesize":true,"radiusCalculation":" Math.sqrt(d.nodesize)+6","bounded":false,"opacityNoHover":0,"clickAction":null}},"evals":[],"jsHooks":[]}</script>
 <p><code>Les data frame MyNodes et MyLinks</code></p>
 <pre><code>##    student group size
-## 1     Abib  grp1    5
-## 2    Afann  grp4    5
-## 3 Bertholo  grp4    5</code></pre>
+## 1    Afann  grp4    5
+## 2 Bertholo  grp4    5
+## 3    Borio  grp2    5</code></pre>
 <pre><code>##   from to Cooc      typeLink Linkcolor
-## 1    2 15    5    Similarite     black
-## 2    2 12    1 Dissimilarite       red
-## 3    2 11    2 Dissimilarite       red</code></pre>
+## 1    1 12    5    Similarite     black
+## 2    1  9    1 Dissimilarite       red
+## 3    1  8    2 Dissimilarite       red</code></pre>
 </div>
 </div>
 </div>
@@ -246,7 +264,7 @@ forceNetwork(Links = MyLinks, Nodes = MyNodes, Source = &quot;from&quot;,
         <h1 class="title is-5">Posts récent</h1>
         
             <h1><a href="/post/graphinterac/">Construire un graphe interactif avec R</a></h1>
-            <time class="has-text-grey-light is-size-7">21 November 2018</time>
+            <time class="has-text-grey-light is-size-7">21 December 2018</time>
         
             <h1><a href="/post/mypost/">MODÉLISATION DES DONNÉES DU TOMPA TREE</a></h1>
             <time class="has-text-grey-light is-size-7">14 November 2018</time>
