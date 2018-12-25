@@ -20,7 +20,7 @@ weight: 10
 categories:
   - Sampling
 tags:
-  - balanced sampling
+  - balancedsamplingr
 ---
 
 

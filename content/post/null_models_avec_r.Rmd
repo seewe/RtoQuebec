@@ -20,7 +20,8 @@ weight: 10
 categories:
   - Statistics
 tags:
-  - Null models
+  - null_models_avec_r
+  - graphinterac
 ---
 
 

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>SEE WE ON R</title>
-    <link>/</link>
-    <description>Recent content on SEE WE ON R</description>
+    <title>Null_models_avec_r on SEE WE ON R</title>
+    <link>/tags/null_models_avec_r/</link>
+    <description>Recent content in Null_models_avec_r on SEE WE ON R</description>
     <generator>Hugo -- gohugo.io</generator>
     <copyright>Copyright © 2008–2018, @JeffProd</copyright>
     <lastBuildDate>Tue, 25 Dec 2018 06:09:41 +0000</lastBuildDate>
     
-	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/null_models_avec_r/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -28,35 +28,6 @@
       <guid>/post/null_models_avec_r/</guid>
       <description>PACKAGES UTILISÉSlibrary(vegan) # permet de simuler les nulls models a partir d&amp;#39;une matrice de présence absenceINTRODUCTIONÀ partir des données d’un échantillon, le statisticien a pour ambition de décrire un phénomène particulier dans la population. L’inférence statistique est cette magie que le statisticien opère à partir d’une partie de la population pour dire avec une certain confiance ce qui se passe dans la population.
 Les tests statistiques sont l’un des outils les plus utilisés dans le domaine de l’inférence.</description>
-    </item>
-    
-    <item>
-      <title>Echantillonnage balancé avec R</title>
-      <link>/post/balancedsamplingr/</link>
-      <pubDate>Tue, 25 Dec 2018 06:04:01 +0000</pubDate>
-      
-      <guid>/post/balancedsamplingr/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Les cartes interactives avec R</title>
-      <link>/post/mappingr/</link>
-      <pubDate>Tue, 25 Dec 2018 06:02:48 +0000</pubDate>
-      
-      <guid>/post/mappingr/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>À propos de Sergio Ewane Ebouele (SeeWe)</title>
-      <link>/about/</link>
-      <pubDate>Tue, 25 Dec 2018 05:34:13 +0000</pubDate>
-      
-      <guid>/about/</guid>
-      <description>Je suis Sergio eWane ebouele (SeeWe).
-J’applique mes connaissances en statistique pour donner plus d’arguments aux décisions ou pour mieux comprendre certains phénomènes mal compris jusqu’à présent.
-Les projets de recherche (un peu plus de 10) et les consultations (un peu plus de 30) sur lesquels j’ai travaillé touchent plusieurs domaines. Je peux citer : la statistique, la conservation de la faune et de l’ensemble de la biodiversité, l’écologie quantitative, la biologie, la médecine, la foresterie, les assurances etc.</description>
     </item>
     
   </channel>

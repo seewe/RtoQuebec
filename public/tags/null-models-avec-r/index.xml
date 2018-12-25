@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Null Model on SEE WE ON R</title>
-    <link>/tags/null-model/</link>
-    <description>Recent content in Null Model on SEE WE ON R</description>
+    <title>Null Models Avec R on SEE WE ON R</title>
+    <link>/tags/null-models-avec-r/</link>
+    <description>Recent content in Null Models Avec R on SEE WE ON R</description>
     <generator>Hugo -- gohugo.io</generator>
     <copyright>Copyright © 2008–2018, @JeffProd</copyright>
-    <lastBuildDate>Tue, 25 Dec 2018 06:00:17 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 25 Dec 2018 06:01:56 +0000</lastBuildDate>
     
-	<atom:link href="/tags/null-model/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/null-models-avec-r/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Construire un graphe interactif avec R</title>
       <link>/post/graphinterac/</link>
-      <pubDate>Tue, 25 Dec 2018 06:00:17 +0000</pubDate>
+      <pubDate>Tue, 25 Dec 2018 06:01:56 +0000</pubDate>
       
       <guid>/post/graphinterac/</guid>
       <description>LES PACKAGES R UTILISÉS DANS LE TUTORIELlibrary(dplyr) # POUR MANIPULER LES JEUX DE DONNÉESlibrary(vegan) # POUR FAIRE LES NULL MODELSlibrary(parallel) # POUR LES CALCULS EN PARALÈLESlibrary(igraph) # POUR CONSTRUIRE LES RESEAUX NON INTERACTIFSlibrary(rgl) # POUR LES REPRÉSENTATIONS EN 3Dlibrary(networkD3) # POUR CONSTRUIRE LES RESEAUX INTERACTIFSINTRODUCTIONLa représentation graphique des données reste un moyen important pour l’exploration de l’information contenue dans les jeux de données.</description>

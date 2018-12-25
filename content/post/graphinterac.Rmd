@@ -20,8 +20,8 @@ weight: 10
 categories:
   - Statistics
 tags:
-  - representations graphique
-  - null model
+  - graphinterac
+  - null_models_avec_r
 ---
 
 # LES PACKAGES R UTILISÉS DANS LE TUTORIEL

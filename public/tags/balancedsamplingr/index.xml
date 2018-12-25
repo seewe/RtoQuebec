@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Balancedsamplingr on SEE WE ON R</title>
+    <link>/tags/balancedsamplingr/</link>
+    <description>Recent content in Balancedsamplingr on SEE WE ON R</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <copyright>Copyright © 2008–2018, @JeffProd</copyright>
+    <lastBuildDate>Tue, 25 Dec 2018 06:04:01 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/balancedsamplingr/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Echantillonnage balancé avec R</title>
+      <link>/post/balancedsamplingr/</link>
+      <pubDate>Tue, 25 Dec 2018 06:04:01 +0000</pubDate>
+      
+      <guid>/post/balancedsamplingr/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>
