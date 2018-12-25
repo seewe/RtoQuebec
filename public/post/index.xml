@@ -1,23 +1,51 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on BLOGDOWNàQUÉBEC</title>
+    <title>Posts on SEE WE ON R</title>
     <link>/post/</link>
-    <description>Recent content in Posts on BLOGDOWNàQUÉBEC</description>
+    <description>Recent content in Posts on SEE WE ON R</description>
     <generator>Hugo -- gohugo.io</generator>
     <copyright>Copyright © 2008–2018, @JeffProd</copyright>
-    <lastBuildDate>Mon, 24 Dec 2018 23:06:01 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 25 Dec 2018 05:29:48 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>Les cartes interactives avec R</title>
+      <link>/post/mappingr/</link>
+      <pubDate>Tue, 25 Dec 2018 05:29:48 +0000</pubDate>
+      
+      <guid>/post/mappingr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Construire un graphe interactif avec R</title>
       <link>/post/graphinterac/</link>
-      <pubDate>Mon, 24 Dec 2018 23:06:01 +0000</pubDate>
+      <pubDate>Tue, 25 Dec 2018 05:29:21 +0000</pubDate>
       
       <guid>/post/graphinterac/</guid>
       <description>LES PACKAGES R UTILISÉS DANS LE TUTORIELlibrary(dplyr) # POUR MANIPULER LES JEUX DE DONNÉESlibrary(vegan) # POUR FAIRE LES NULL MODELSlibrary(parallel) # POUR LES CALCULS EN PARALÈLESlibrary(igraph) # POUR CONSTRUIRE LES RESEAUX NON INTERACTIFSlibrary(rgl) # POUR LES REPRÉSENTATIONS EN 3Dlibrary(networkD3) # POUR CONSTRUIRE LES RESEAUX INTERACTIFSINTRODUCTIONLa représentation graphique des données reste un moyen important pour l’exploration de l’information contenue dans les jeux de données.</description>
+    </item>
+    
+    <item>
+      <title>Echantillonnage balancé avec R</title>
+      <link>/post/balancedsamplingr/</link>
+      <pubDate>Tue, 25 Dec 2018 02:18:03 +0000</pubDate>
+      
+      <guid>/post/balancedsamplingr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Null models</title>
+      <link>/post/null-models-avec-r/</link>
+      <pubDate>Tue, 25 Dec 2018 02:04:48 +0000</pubDate>
+      
+      <guid>/post/null-models-avec-r/</guid>
+      <description>PACKAGES UTILISÉSlibrary(vegan) # permet de simuler les nulls models a partir d&amp;#39;une matrice de présence absenceINTRODUCTIONÀ partir des données d’un échantillon, le statisticien a pour ambition de décrire un phénomène particulier dans la population. L’inférence statistique est cette magie que le statisticien opère à partir d’une partie de la population pour dire avec une certain confiance ce qui se passe dans la population.
+Les tests statistiques sont l’un des outils les plus utilisés dans le domaine de l’inférence.</description>
     </item>
     
   </channel>

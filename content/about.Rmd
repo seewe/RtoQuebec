@@ -1,0 +1,36 @@
+---
+title: À propos de Sergio eWane ebouele (SeeWe)
+author: Sergio Ewane Ebouele
+linktitle: À PROPOS DE SEEWE (Sergio Ewane Ebouele)
+date: "`r Sys.time()`"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+  html_notebook:
+    fig_width: 13
+    toc: yes
+menu:
+  main:
+    parent: tutorials
+slug: about
+categories: []
+tags: []
+---
+
+![](/post/graphinterac_files/sergio.png)    ![](/post/graphinterac_files/logo.jpg) 
+
+Je suis **Se**rgio **eW**ane **e**bouele (SeeWe).  
+  J'applique mes connaissances en **statistique** pour donner plus d'arguments aux décisions ou pour mieux comprendre certains phénomènes mal compris jusqu'à présent.  
+  Les projets de recherche (un peu plus de 10) et les consultations (un peu plus de 30) sur lesquels j'ai travaillé touchent plusieurs domaines. Je peux citer : la statistique, la conservation de la faune et de l’ensemble de la biodiversité, l'écologie quantitative, la biologie, la médecine, la foresterie, les assurances etc.  
+Je suis titulaire d'une **maîtrise en statistique** du département de mathématiques et statistique de la faculté des sciences et génie de l'[Université Laval](https://www.ulaval.ca/) (Québec, Canada). Deux ans avant mon admission à l'Université Laval, j'ai obtenu mon diplôme d'**ingénieur d'application de la statistique** à l'[Institut Sous-régional de Statistique et d'Économie Appliquée](http://www.issea.cemac.int/) (Yaoundé, Cameroun).  
+  Pendant mon parcour d'étudiant à la maîtrise en statistique de l'Université Laval, j'ai occupé des postes d'emplois étudiants au département de mathématiques et statistique. Je peux citer le poste de **consultant étudiant** au service de consultation statistique [SCS](https://scs.mat.ulaval.ca/accueil/) et le poste de **tuteur** au centre de dépannage et d'apprentissage [CDA](https://www.mat.ulaval.ca/services/cda-centre-de-depannage-et-dapprentissage-en-mathematiques/).  
+Je travaille actuellement comme **professionnel de recherche** au département de mathématiques et statistique de l'Université Laval, sous la responsabilité de [Louis-Paul Rivest](https://www.mat.ulaval.ca/lrivest/louis-paul-rivest/). Mes travaux de recherche ont porté sur plusieurs sujets en statistique telles que les modèles de regression, les copules et l'échantillonnage. Je participe aussi sur quelques projets de recherche du premier chantier thématique du programme de recherche [Sentinelle Nord](https://sentinellenord.ulaval.ca/fr/recherche/analyse-reseau-des-especes-parapluie-evaluer-lintegrite-des-ecosystemes-du-nord) de l'Université Laval.  
+
+
+![](/post/graphinterac_files/ulaval.png)  ![](/post/graphinterac_files/issea.png)
+
+
+
+
+

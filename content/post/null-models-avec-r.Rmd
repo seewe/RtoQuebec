@@ -1,0 +1,78 @@
+---
+title: "Null models"
+author: "Sergio Ewane Ebouele"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+  html_notebook:
+    fig_width: 13
+    toc: yes
+menu:
+  main:
+    parent: tutorials
+next: /tutorials/github-pages-blog
+linktitle: NULL MODELS AVEC R
+prev: /tutorials/automated-deployments
+archives: '2018'
+weight: 10
+categories:
+  - Statistics
+tags:
+  - Null models
+---
+
+
+# PACKAGES UTILISÉS
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+library(vegan)   # permet de simuler les nulls models a partir d'une matrice de présence absence
+```
+
+
+# INTRODUCTION
+À partir des données d'un échantillon, le statisticien a pour ambition de décrire un phénomène particulier dans la population. L'inférence statistique est cette magie que le statisticien opère à partir d'une partie de la population pour dire avec une certain confiance ce qui se passe dans la population.  
+Les tests statistiques sont l'un des outils les plus utilisés dans le domaine de l'inférence. Un test statistique permet de confronter deux hypothèses disjoints et de conclure au rejet de l'un ou à l'acceptation de l'autre. On confronte l'hypothèse nulle `H0` (est l'hypothèse de la verité actuelle, de ce qui est considérée comme la norme, de ce qui est standard ou le statu qo) à une hypothèse alternative `H1` (est l'hypothèse de la recherche, de l'innovation, de ce que l'on veut montrer). En exemple, imaginez vous étudiant en troisième année de statistique dans une université québécoise. Votre cadet, après avoir suivi une page publicitaire à la télévision vous demande ceci : `Est - il vrai que les québécois sont plus grands de taille que les parisiens ? Un biologiste vient de l'affirmer dans une publicité de vêtement d'été.`  
+Pour répondre à ce jeune, supposons la taille moyenne des parisiens connue. Cette même information étant absente pour la ville de Québec, le statisticien va collecter les informations sur la taille d'un échantillon de québécois. À partir des données de cet échantillon il pourra accepter ou rejeter les affirmations du biologiste avec un niveau de confiance donné. Pour resoudre ce problème, l'une des condition préalable est de supposer que la taille moyenne des habitants de Québec est distribuée selon une loi connue sous l'hypothèse nulle du test.  
+Que se passe t-il lorsque la loi sous l'hypothèse nulle du test est inconnue ? Nous allons répondre à cette question dans le cas particulier de l'étude des modèles de regroupement dans les communautés écologique. On voudrait connaitre si la présence ou l'absence des espèces sur les sites est dû au hasard. Sinon, quelle est la structure de regroupement qui dictent leur comportement de présence-absence. 
+
+
+# LES NULL MODELS
+
+## Définition
+De manière litérale, le terme `null model` peut renvoyer à une absence de modèle. En d'autre terme, il s'agit de générer un phénomène sans connaitre la loi qui le détermine. Dans le cas des communautés écologiques, il s'agit de générer une communauté écologique, à partir d'une communauté réellement observée,  dans laquelle la présence et l'absence des espèces sur les sites est déterminé par le hasard. La communauté observée et la communauté générée ont certaines caractéristiques communes.  
+En termes de données, une communauté écologique peut être représentée par une matrice dont les lignes représentent les espèces et les colonnes présentent les sites. Une cellule de cette matrice peut prendre l'une des valeurs suivantes : `1` si l'espèce de cette cellule est présente sur le site de la cellule et `0` si l'espèce de la cellule est absente de cette cellule. On notera cette matrice `Mpa`.  La `Mpa` observée et la `Mpa` simulée peuvent avoir les mêmes totaux lignes seulement, les mêmes totaux colonne seulement ou les deux à la fois. Selon les caractéristiques communes des `Mpa`, on peut définir quatre types de null modesls :  
+  - Null models de type `Fixed-Fixed`: c'est celui pour lequel la `Mpa` générée et la `Mpa` observée ont les même totaux lignes et les mêmes totaux colonnes.  
+  - Null models de type `Fixed-Equiprobable` : c'est celui pour lequel la `Mpa` générée et la `Mpa` observée ont les même totaux lignes mais les totaux colonnes sont différents. Dans ce cas, la probabilité de présence d'une espèce sur un site est la même d'un site à un autre.   
+  - Null models de type `Equiprobable-Fixed` : c'est celui pour lequel la `Mpa` générée et la `Mpa` observée ont les même totaux colonnes mais les totaux lignes sont différents. Dans ce cas, la probabilité de présence d'une espèce sur un site est la même d'une espèce à une autre. 
+  - Null model de type `Equiprobable-Equiprobable` : C'est celui pour lequel la `Mpa` générée et la `Mpa` observée n'ont rien en commun. Les espèces ont la même chance d'être présent sur les sites et les sites ont la même chance d'avoir une espèce donnée. 
+
+
+## Principe du test statististique basé sur les null models
+En écologie, un chercheur pourrait s'interresser à l'existence d'une structure de regroupment particulière dans une communauté écologique. Supposons qu'il s'interesse à la cooccurrence entre les espèces d'une communauté écologique qu'il a observée.  
+Comme nous l'avons décrit à l'introduction, il peut utiliser un test d'hypothèses pour confronter l'hypothèse d'indépendance dans le regroupement des espèces contre l'hypothèse de l'existence d'une structure de regroupement particulière des espèces. Le test basé sur les null models permet de comparer la communauté écologique observée par le chercheur à celles générées par le null model (communauté dans laquelle le regroupement des espèces est déterminé par le hasard).  
+En réalité, on ne compare pas les communautés écologique mais plutôt des indicateurs calculés sur les communautés. Ainsi, la communauté observée n'a pas de structure de regroupement particulière si l'indicateur calculée dans cette communauté est similaire à ceux calculées sur les `Mpa` générées. Sinon, on conclu à l'existence d'une structure de regroupement particulière.  
+Voyons concrètement de quoi il s'agit dans l'exemple ci-dessous.
+
+
+# APPLICATION
+
+## Jeu de données
+Les données utilisées dans ce tutoriel sont fictives. On veut connaitre la structure de regroupement des chiens domestiques de la ville de Québec aucour d'une belle journée ensoleillée de l'été. Pour cela, on a observé  la présence ou l'absence de certaines race de chiens domestiques dans les parcs de la ville de Québec. Les données collectées sont les suivantes.
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+

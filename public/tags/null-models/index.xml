@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Null Models on SEE WE ON R</title>
+    <link>/tags/null-models/</link>
+    <description>Recent content in Null Models on SEE WE ON R</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <copyright>Copyright © 2008–2018, @JeffProd</copyright>
+    <lastBuildDate>Tue, 25 Dec 2018 02:04:48 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/null-models/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Null models</title>
+      <link>/post/null-models-avec-r/</link>
+      <pubDate>Tue, 25 Dec 2018 02:04:48 +0000</pubDate>
+      
+      <guid>/post/null-models-avec-r/</guid>
+      <description>PACKAGES UTILISÉSlibrary(vegan) # permet de simuler les nulls models a partir d&amp;#39;une matrice de présence absenceINTRODUCTIONÀ partir des données d’un échantillon, le statisticien a pour ambition de décrire un phénomène particulier dans la population. L’inférence statistique est cette magie que le statisticien opère à partir d’une partie de la population pour dire avec une certain confiance ce qui se passe dans la population.
+Les tests statistiques sont l’un des outils les plus utilisés dans le domaine de l’inférence.</description>
+    </item>
+    
+  </channel>
+</rss>

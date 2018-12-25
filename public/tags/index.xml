@@ -1,14 +1,69 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Tags on BLOGDOWNàQUÉBEC</title>
+    <title>Tags on SEE WE ON R</title>
     <link>/tags/</link>
-    <description>Recent content in Tags on BLOGDOWNàQUÉBEC</description>
+    <description>Recent content in Tags on SEE WE ON R</description>
     <generator>Hugo -- gohugo.io</generator>
     <copyright>Copyright © 2008–2018, @JeffProd</copyright>
+    <lastBuildDate>Tue, 25 Dec 2018 02:18:03 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Balanced Sampling</title>
+      <link>/tags/balanced-sampling/</link>
+      <pubDate>Tue, 25 Dec 2018 02:18:03 +0000</pubDate>
+      
+      <guid>/tags/balanced-sampling/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Earth Mapping</title>
+      <link>/tags/earth-mapping/</link>
+      <pubDate>Tue, 25 Dec 2018 05:29:48 +0000</pubDate>
+      
+      <guid>/tags/earth-mapping/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Null Model</title>
+      <link>/tags/null-model/</link>
+      <pubDate>Tue, 25 Dec 2018 05:29:21 +0000</pubDate>
+      
+      <guid>/tags/null-model/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Null Models</title>
+      <link>/tags/null-models/</link>
+      <pubDate>Tue, 25 Dec 2018 02:04:48 +0000</pubDate>
+      
+      <guid>/tags/null-models/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Representation Graphique</title>
+      <link>/tags/representation-graphique/</link>
+      <pubDate>Tue, 25 Dec 2018 05:29:48 +0000</pubDate>
+      
+      <guid>/tags/representation-graphique/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Representations Graphique</title>
+      <link>/tags/representations-graphique/</link>
+      <pubDate>Tue, 25 Dec 2018 05:29:21 +0000</pubDate>
+      
+      <guid>/tags/representations-graphique/</guid>
+      <description></description>
+    </item>
     
   </channel>
 </rss>
